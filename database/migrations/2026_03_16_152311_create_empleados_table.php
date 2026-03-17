@@ -12,7 +12,7 @@ return new class extends Migration
     public $withinTransaction = false;
     public function up(): void {
     Schema::create('empleados', function (Blueprint $table) {
-        $table->id('id_empleado');
+        $table->id();
         $table->string('nombre');
         $table->string('puesto'); // Administrador / Colaborador
         $table->timestamps();
