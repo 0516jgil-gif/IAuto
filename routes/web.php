@@ -7,6 +7,7 @@ use App\Http\Controllers\VentaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EmpleadoController;
 
+Route::get('/', [VehiculoController::class, 'index']);
 Route::get('/catalogo', [VehiculoController::class, 'index']);
 Route::get('/historial-ventas', [VentaController::class, 'index']);
 Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
