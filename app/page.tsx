@@ -5,7 +5,7 @@ export default function Home() {
     <div style={{ padding: "2rem", color: "#fff", textAlign: "center" }}>
       <h1 style={{ fontSize: "2rem", marginBottom: "2rem" }}>🚗 IAuto - Panel de gestión</h1>
       <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-        <Link href="/cliente" style={btnStyle}>👥 Clientes</Link>
+        <Link href="/clientes" style={btnStyle}>👥 Clientes</Link>
         <Link href="/empleado" style={btnStyle}>👔 Empleados</Link>
         <Link href="/vehiculo" style={btnStyle}>🚙 Vehículos</Link>
         <Link href="/venta" style={btnStyle}>💰 Ventas</Link>
