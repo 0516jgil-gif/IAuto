@@ -16,8 +16,7 @@ export default function Empleados() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         nombre: form.nombre.value,
-        email: form.email.value,
-        telefono: form.telefono.value,
+        puesto: form.puesto.value,
       }),
     });
     form.reset();
@@ -29,8 +28,7 @@ export default function Empleados() {
       <h1>Empleados</h1>
       <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
         <input name="nombre" placeholder="Nombre" required style={{ marginRight: "0.5rem" }} />
-        <input name="email" placeholder="Email" required style={{ marginRight: "0.5rem" }} />
-        <input name="telefono" placeholder="Teléfono" required style={{ marginRight: "0.5rem" }} />
+        <input name="puesto" placeholder="Puesto" required style={{ marginRight: "0.5rem" }} />
         <button type="submit">Crear</button>
       </form>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -38,8 +36,7 @@ export default function Empleados() {
           <tr>
             <th style={{ border: "1px solid #fff", padding: "0.5rem" }}>ID</th>
             <th style={{ border: "1px solid #fff", padding: "0.5rem" }}>Nombre</th>
-            <th style={{ border: "1px solid #fff", padding: "0.5rem" }}>Email</th>
-            <th style={{ border: "1px solid #fff", padding: "0.5rem" }}>Teléfono</th>
+            <th style={{ border: "1px solid #fff", padding: "0.5rem" }}>Puesto</th>
           </tr>
         </thead>
         <tbody>
@@ -47,8 +44,7 @@ export default function Empleados() {
             <tr key={e.id}>
               <td style={{ border: "1px solid #fff", padding: "0.5rem" }}>{e.id}</td>
               <td style={{ border: "1px solid #fff", padding: "0.5rem" }}>{e.nombre}</td>
-              <td style={{ border: "1px solid #fff", padding: "0.5rem" }}>{e.email}</td>
-              <td style={{ border: "1px solid #fff", padding: "0.5rem" }}>{e.telefono}</td>
+              <td style={{ border: "1px solid #fff", padding: "0.5rem" }}>{e.puesto}</td>
             </tr>
           ))}
         </tbody>
