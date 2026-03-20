@@ -6,7 +6,7 @@ export default function Clientes() {
   const [clientes, setClientes] = useState([]);
 
   useEffect(() => {
-    fetch("/api/clientes")
+    fetch("/api/Clientes")
       .then(res => res.json())
       .then(setClientes);
   }, []);
@@ -15,7 +15,7 @@ export default function Clientes() {
     e.preventDefault();
     const form = e.target;
 
-    await fetch("/api/clientes", {
+    await fetch("/api/Clientes", {
       method: "POST",
       headers: {
       "Content-Type": "application/json", // <- MUY IMPORTANTE
@@ -28,7 +28,7 @@ export default function Clientes() {
 });
 
     form.reset();
-    setClientes(await (await fetch("/api/clientes")).json());
+    setClientes(await (await fetch("/api/Clientes")).json());
   };
 
   return (
