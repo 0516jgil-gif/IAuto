@@ -25,7 +25,7 @@ export default function AuthPage() {
       if (res.ok) {
         const user = await res.json();
         localStorage.setItem("userId", user.id);
-        router.push("/perfil");
+        router.push("/Vehiculos");
       } else {
         alert("Email no encontrado. ¡Regístrate primero!");
       }
