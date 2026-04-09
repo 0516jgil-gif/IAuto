@@ -2,133 +2,132 @@
 
 import { useEffect, useState } from "react";
 
-export default function Clientes() {
-  const [clientes, setClientes] = useState([]);
+export default function PerfilCliente() {
+  const [cliente, setCliente] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/Clientes")
+    // Aquí cargaríamos los datos del cliente logueado
+    fetch("/api/Clientes/mi-perfil") // Asumiendo un endpoint de sesión o perfil
       .then(res => res.json())
-      .then(setClientes);
+      .then(data => {
+        setCliente(data);
+        setLoading(false);
+      });
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.target;
-
-    await fetch("/api/Clientes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nombre: form.nombre.value,
-        email: form.email.value,
-        telefono: form.telefono.value,
-      }),
-    });
-
-    form.reset();
-    setClientes(await (await fetch("/api/Clientes")).json());
-  };
-
-  // --- ESTILOS VISUALES ---
-  const gridContainerStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-    gap: "1.5rem",
-    marginTop: "2rem"
-  };
-
-  const cardStyle = {
-    backgroundColor: "#1a1a1a",
-    border: "1px solid #333",
-    borderRadius: "12px",
-    padding: "1.5rem",
+  // --- ESTILOS ---
+  const headerStyle = {
     display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.5)"
+    alignItems: "center",
+    padding: "1rem 2rem",
+    backgroundColor: "#111",
+    borderBottom: "1px solid #333",
+    position: "sticky",
+    top: 0,
+    zIndex: 100
   };
 
-  const badgeStyle = (isPending) => ({
-    backgroundColor: isPending ? "#422c00" : "#064e3b",
-    color: isPending ? "#fbbf24" : "#34d399",
-    padding: "0.25rem 0.6rem",
-    borderRadius: "4px",
-    fontSize: "0.75rem",
-    fontWeight: "bold",
-    textTransform: "uppercase"
-  });
+  const backButtonStyle = {
+    backgroundColor: "transparent",
+    color: "#3b82f6",
+    border: "1px solid #3b82f6",
+    padding: "0.5rem 1rem",
+    borderRadius: "20px",
+    cursor: "pointer",
+    marginRight: "1.5rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem"
+  };
+
+  const sectionStyle = {
+    backgroundColor: "#1a1a1a",
+    borderRadius: "15px",
+    padding: "2rem",
+    marginBottom: "2rem",
+    border: "1px solid #222"
+  };
+
+  const carCardStyle = {
+    backgroundColor: "#222",
+    borderRadius: "10px",
+    padding: "1rem",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    border: "1px solid #333"
+  };
+
+  if (loading) return <div style={{ color: "#fff", padding: "2rem" }}>Cargando tu perfil...</div>;
 
   return (
-    <div style={{ padding: "2rem", color: "#eee", fontFamily: "sans-serif" }}>
-      <header style={{ marginBottom: "2.5rem" }}>
-        <h1 style={{ fontSize: "2.2rem", color: "#fff", marginBottom: "0.5rem" }}>Gestión de Clientes</h1>
-        <p style={{ color: "#888" }}>Panel de fidelización y seguimiento de trámites</p>
+    <div style={{ backgroundColor: "#000", minHeight: "100vh", color: "#fff", fontFamily: "sans-serif" }}>
+      
+      {/* Encabezado con Navegación */}
+      <header style={headerStyle}>
+        <button onClick={() => window.history.back()} style={backButtonStyle}>
+          ← Volver al Catálogo
+        </button>
+        <h2 style={{ fontSize: "1.2rem", margin: 0 }}>Mi Cuenta</h2>
       </header>
 
-      {/* Formulario de Registro */}
-      <form onSubmit={handleSubmit} style={{ 
-        marginBottom: "3rem", 
-        padding: "1.5rem", 
-        backgroundColor: "#222", 
-        borderRadius: "10px",
-        display: "flex",
-        gap: "1rem",
-        flexWrap: "wrap",
-        alignItems: "center"
-      }}>
-        <input name="nombre" placeholder="Nombre completo" required style={{ flex: 1, padding: "0.7rem", borderRadius: "5px", border: "1px solid #444", backgroundColor: "#111", color: "#fff" }}/>
-        <input name="email" placeholder="Correo electrónico" required style={{ flex: 1, padding: "0.7rem", borderRadius: "5px", border: "1px solid #444", backgroundColor: "#111", color: "#fff" }}/>
-        <input name="telefono" placeholder="Teléfono" required style={{ flex: 1, padding: "0.7rem", borderRadius: "5px", border: "1px solid #444", backgroundColor: "#111", color: "#fff" }}/>
-        <button type="submit" style={{ padding: "0.7rem 2rem", backgroundColor: "#3b82f6", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
-          Registrar
-        </button>
-      </form>
-
-      {/* Grid de Clientes */}
-      <div style={gridContainerStyle}>
-        {clientes.map(c => (
-          <div key={c.id} style={cardStyle}>
-            {/* Cabecera: Nombre e ID */}
-            <div style={{ borderBottom: "1px solid #333", paddingBottom: "0.8rem", display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-              <div>
-                <h3 style={{ margin: 0, color: "#fff", fontSize: "1.2rem" }}>{c.nombre}</h3>
-                <span style={{ fontSize: "0.8rem", color: "#666" }}>ID: {c.id}</span>
-              </div>
-              {/* Badge de Trámite: Aquí asumo que tu objeto 'c' podría tener 'tramiteActivo' */}
-              <span style={badgeStyle(c.tramiteActivo)}>
-                {c.tramiteActivo ? "Trámite en curso" : "Sin trámites"}
-              </span>
+      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem" }}>
+        
+        {/* Sección 1: Datos Personales */}
+        <section style={sectionStyle}>
+          <h3 style={{ marginTop: 0, color: "#3b82f6" }}>Mis Datos</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div>
+              <label style={{ fontSize: "0.8rem", color: "#666" }}>NOMBRE</label>
+              <p style={{ margin: "0.2rem 0" }}>{cliente?.nombre}</p>
             </div>
-
-            {/* Datos de Contacto */}
-            <div style={{ fontSize: "0.9rem" }}>
-              <div style={{ marginBottom: "0.4rem" }}>📧 {c.email}</div>
-              <div>📞 {c.telefono}</div>
-            </div>
-
-            {/* Sección de "Me Gusta" */}
-            <div style={{ marginTop: "0.5rem" }}>
-              <span style={{ fontSize: "0.75rem", color: "#888", display: "block", marginBottom: "0.5rem", textTransform: "uppercase" }}>
-                Vehículos Favoritos
-              </span>
-              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                {/* Asumo que 'c.likes' es un array de strings o modelos */}
-                {c.likes && c.likes.length > 0 ? (
-                  c.likes.map((car, idx) => (
-                    <span key={idx} style={{ backgroundColor: "#333", padding: "0.3rem 0.6rem", borderRadius: "15px", fontSize: "0.8rem" }}>
-                      🚗 {car}
-                    </span>
-                  ))
-                ) : (
-                  <span style={{ fontSize: "0.85rem", color: "#555", fontStyle: "italic" }}>No hay favoritos guardados</span>
-                )}
-              </div>
+            <div>
+              <label style={{ fontSize: "0.8rem", color: "#666" }}>EMAIL</label>
+              <p style={{ margin: "0.2rem 0" }}>{cliente?.email}</p>
             </div>
           </div>
-        ))}
-      </div>
+        </section>
+
+        {/* Sección 2: Estado de Compras / Trámites */}
+        <section style={sectionStyle}>
+          <h3 style={{ marginTop: 0, color: "#10b981" }}>Mis Trámites</h3>
+          {cliente?.tramiteActivo ? (
+            <div style={{ backgroundColor: "#064e3b", padding: "1rem", borderRadius: "8px", border: "1px solid #059669" }}>
+              <strong style={{ display: "block" }}>¡Tienes una compra en curso!</strong>
+              <span style={{ fontSize: "0.9rem" }}>Nuestro equipo está revisando la documentación de tu próximo vehículo.</span>
+            </div>
+          ) : (
+            <p style={{ color: "#666" }}>No tienes trámites de compra activos actualmente.</p>
+          )}
+        </section>
+
+        {/* Sección 3: Mis "Me Gusta" (Grid de Coches Favoritos) */}
+        <section style={sectionStyle}>
+          <h3 style={{ marginTop: 0, color: "#ef4444" }}>Coches Favoritos</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {cliente?.likes?.length > 0 ? (
+              cliente.likes.map((carId, index) => (
+                <div key={index} style={carCardStyle}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                    <span style={{ fontSize: "1.5rem" }}>🚗</span>
+                    <span>{carId}</span> {/* Aquí iría el nombre del modelo */}
+                  </div>
+                  <button 
+                    style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "1.2rem" }}
+                    title="Quitar de favoritos"
+                  >
+                    ❤️
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p style={{ color: "#666" }}>Aún no has guardado ningún coche en favoritos.</p>
+            )}
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 }
