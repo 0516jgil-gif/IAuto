@@ -34,91 +34,101 @@ export default function Clientes() {
   // --- ESTILOS VISUALES ---
   const gridContainerStyle = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
     gap: "1.5rem",
     marginTop: "2rem"
   };
 
   const cardStyle = {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#1a1a1a",
     border: "1px solid #333",
     borderRadius: "12px",
     padding: "1.5rem",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
-    transition: "transform 0.2s",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.5)"
   };
 
-  const labelStyle = {
-    fontSize: "0.8rem",
-    color: "#888",
-    display: "block",
-    marginBottom: "0.2rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05rem"
-  };
-
-  const inputStyle = {
-    padding: "0.6rem",
-    borderRadius: "6px",
-    border: "1px solid #444",
-    backgroundColor: "#2a2a2a",
-    color: "#fff",
-    marginRight: "0.5rem",
-    marginBottom: "0.5rem"
-  };
+  const badgeStyle = (isPending) => ({
+    backgroundColor: isPending ? "#422c00" : "#064e3b",
+    color: isPending ? "#fbbf24" : "#34d399",
+    padding: "0.25rem 0.6rem",
+    borderRadius: "4px",
+    fontSize: "0.75rem",
+    fontWeight: "bold",
+    textTransform: "uppercase"
+  });
 
   return (
-    <div style={{ padding: "2rem", color: "#fff", fontFamily: "sans-serif" }}>
-      <h1 style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Nuestros Vehículos</h1>
+    <div style={{ padding: "2rem", color: "#eee", fontFamily: "sans-serif" }}>
+      <header style={{ marginBottom: "2.5rem" }}>
+        <h1 style={{ fontSize: "2.2rem", color: "#fff", marginBottom: "0.5rem" }}>Gestión de Clientes</h1>
+        <p style={{ color: "#888" }}>Panel de fidelización y seguimiento de trámites</p>
+      </header>
 
-      {/* Formulario mantenido igual, solo con toques de estilo */}
-      <form onSubmit={handleSubmit} style={{ marginBottom: "3rem", padding: "1.5rem", backgroundColor: "#1e1e1e", borderRadius: "10px" }}>
-        <h3 style={{ marginTop: 0 }}>Registrar Nuevo</h3>
-        <input name="nombre" placeholder="Marca / Modelo" required style={inputStyle} />
-        <input name="email" placeholder="Email Contacto" required style={inputStyle} />
-        <input name="telefono" placeholder="Teléfono" required style={inputStyle} />
-        <button type="submit" style={{ 
-          padding: "0.6rem 1.5rem", 
-          borderRadius: "6px", 
-          backgroundColor: "#0070f3", 
-          color: "#fff", 
-          border: "none", 
-          cursor: "pointer",
-          fontWeight: "bold" 
-        }}>
-          Añadir
+      {/* Formulario de Registro */}
+      <form onSubmit={handleSubmit} style={{ 
+        marginBottom: "3rem", 
+        padding: "1.5rem", 
+        backgroundColor: "#222", 
+        borderRadius: "10px",
+        display: "flex",
+        gap: "1rem",
+        flexWrap: "wrap",
+        alignItems: "center"
+      }}>
+        <input name="nombre" placeholder="Nombre completo" required style={{ flex: 1, padding: "0.7rem", borderRadius: "5px", border: "1px solid #444", backgroundColor: "#111", color: "#fff" }}/>
+        <input name="email" placeholder="Correo electrónico" required style={{ flex: 1, padding: "0.7rem", borderRadius: "5px", border: "1px solid #444", backgroundColor: "#111", color: "#fff" }}/>
+        <input name="telefono" placeholder="Teléfono" required style={{ flex: 1, padding: "0.7rem", borderRadius: "5px", border: "1px solid #444", backgroundColor: "#111", color: "#fff" }}/>
+        <button type="submit" style={{ padding: "0.7rem 2rem", backgroundColor: "#3b82f6", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
+          Registrar
         </button>
       </form>
 
-      {/* Grid de Tarjetas en lugar de Tabla */}
+      {/* Grid de Clientes */}
       <div style={gridContainerStyle}>
         {clientes.map(c => (
-          <div key={c.id} style={cardStyle} className="vehicle-card">
-            <div style={{ marginBottom: "1rem" }}>
-              <span style={labelStyle}>Vehículo</span>
-              <strong style={{ fontSize: "1.2rem", color: "#60a5fa" }}>{c.nombre}</strong>
-            </div>
-            
-            <div style={{ marginBottom: "0.8rem" }}>
-              <span style={labelStyle}>Contacto</span>
-              <div style={{ fontSize: "0.95rem" }}>{c.email}</div>
-            </div>
-
-            <div>
-              <span style={labelStyle}>Teléfono</span>
-              <div style={{ fontSize: "0.95rem" }}>{c.telefono}</div>
+          <div key={c.id} style={cardStyle}>
+            {/* Cabecera: Nombre e ID */}
+            <div style={{ borderBottom: "1px solid #333", paddingBottom: "0.8rem", display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+              <div>
+                <h3 style={{ margin: 0, color: "#fff", fontSize: "1.2rem" }}>{c.nombre}</h3>
+                <span style={{ fontSize: "0.8rem", color: "#666" }}>ID: {c.id}</span>
+              </div>
+              {/* Badge de Trámite: Aquí asumo que tu objeto 'c' podría tener 'tramiteActivo' */}
+              <span style={badgeStyle(c.tramiteActivo)}>
+                {c.tramiteActivo ? "Trámite en curso" : "Sin trámites"}
+              </span>
             </div>
 
-            <div style={{ marginTop: "1rem", fontSize: "0.7rem", color: "#444", textAlign: "right" }}>
-              ID: {c.id}
+            {/* Datos de Contacto */}
+            <div style={{ fontSize: "0.9rem" }}>
+              <div style={{ marginBottom: "0.4rem" }}>📧 {c.email}</div>
+              <div>📞 {c.telefono}</div>
+            </div>
+
+            {/* Sección de "Me Gusta" */}
+            <div style={{ marginTop: "0.5rem" }}>
+              <span style={{ fontSize: "0.75rem", color: "#888", display: "block", marginBottom: "0.5rem", textTransform: "uppercase" }}>
+                Vehículos Favoritos
+              </span>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                {/* Asumo que 'c.likes' es un array de strings o modelos */}
+                {c.likes && c.likes.length > 0 ? (
+                  c.likes.map((car, idx) => (
+                    <span key={idx} style={{ backgroundColor: "#333", padding: "0.3rem 0.6rem", borderRadius: "15px", fontSize: "0.8rem" }}>
+                      🚗 {car}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ fontSize: "0.85rem", color: "#555", fontStyle: "italic" }}>No hay favoritos guardados</span>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
-
-      {clientes.length === 0 && (
-        <p style={{ textAlign: "center", color: "#666" }}>No hay vehículos disponibles en este momento.</p>
-      )}
     </div>
   );
 }
