@@ -4,115 +4,385 @@ import { useState, useEffect } from "react";
 export default function InicioIAuto() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [usuario, setUsuario] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // 1. Manejo del scroll
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
     window.addEventListener("scroll", handleScroll);
 
-    // 2. Lógica de Sesión (Inactividad 30 min)
     const userId = localStorage.getItem("userId");
     const lastActivity = localStorage.getItem("lastActivity");
+    const rol = localStorage.getItem("userRol");
+    const adminName = localStorage.getItem("userName");
     const ahora = new Date().getTime();
-    const treintaMinutos = 30 * 60 * 1000;
 
-    if (userId && lastActivity) {
-      if (ahora - parseInt(lastActivity) > treintaMinutos) {
-        localStorage.clear(); // Sesión expirada
-        setUsuario(null);
+    if (
+      userId &&
+      lastActivity &&
+      ahora - parseInt(lastActivity) < 30 * 60 * 1000
+    ) {
+      if (rol && rol.toLowerCase() === "admin" && adminName) {
+        setUsuario({ nombre: adminName });
+        setIsAdmin(true);
       } else {
-        // Sesión válida: buscamos el nombre para el header
         fetch("/api/Clientes")
-          .then(res => res.json())
-          .then(data => {
-            const user = data.find(c => c.id === parseInt(userId));
+          .then((r) => r.json())
+          .then((data) => {
+            const user = data.find((c) => c.id === parseInt(userId));
             if (user) setUsuario(user);
           });
       }
+    } else if (userId) {
+      localStorage.clear();
     }
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinkStyle = { 
-    color: "#ccc", 
-    textDecoration: "none", 
-    marginLeft: "1.5rem", 
-    fontSize: "0.85rem",
+  const navLink = {
+    color: "#aaa",
+    textDecoration: "none",
+    marginLeft: "1.5rem",
+    fontSize: "0.88rem",
     fontWeight: "500",
-    transition: "color 0.2s"
+    transition: "0.2s",
   };
 
   return (
-    <div style={{ backgroundColor: "#000", color: "#fff", fontFamily: "sans-serif" }}>
-      
-      <header style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "1rem 4rem", position: "fixed", width: "100%", top: 0,
-        backgroundColor: isScrolled ? "rgba(0,0,0,0.95)" : "transparent",
-        backdropFilter: isScrolled ? "blur(10px)" : "none",
-        transition: "0.3s", zIndex: 1000, boxSizing: "border-box",
-        borderBottom: isScrolled ? "1px solid #222" : "none"
-      }}>
-        <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#3b82f6", letterSpacing: "1px" }}>
+    <div
+      style={{
+        backgroundColor: "#000",
+        color: "#fff",
+        fontFamily: "sans-serif",
+      }}
+    >
+      {/* HEADER */}
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "1rem 4rem",
+          position: "fixed",
+          top: 0,
+          width: "100%",
+          zIndex: 1000,
+          boxSizing: "border-box",
+          transition: "0.3s",
+          backgroundColor: isScrolled
+            ? "rgba(0,0,0,0.95)"
+            : "transparent",
+          backdropFilter: isScrolled ? "blur(10px)" : "none",
+          borderBottom: isScrolled
+            ? "1px solid #111"
+            : "none",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "800",
+            color: "#3b82f6",
+            letterSpacing: "2px",
+          }}
+        >
           IAUTO
         </div>
 
-        <nav style={{ display: "flex", alignItems: "center" }}>
-          <a href="/" style={navLinkStyle}>Inicio</a>
-          <a href="/Vehiculos" style={navLinkStyle}>Vehículos</a>
-          <a href="/Clientes" style={navLinkStyle}>Admin Clientes</a>
-          <a href="/Empleados" style={navLinkStyle}>Personal</a>
-          <a href="/Ventas" style={navLinkStyle}>Ventas</a>
-          
-          {/* BOTÓN DINÁMICO: Cambia según si hay sesión */}
-          <a href={usuario ? "/Vehiculos" : "/login"} style={{ 
-            ...navLinkStyle, 
-            backgroundColor: "#3b82f6", 
-            padding: "0.6rem 1.2rem", 
-            borderRadius: "20px", 
-            color: "#fff",
-            marginLeft: "2rem" 
-          }}>
-            {usuario ? `Hola, ${usuario.nombre.split(' ')[0]}` : "Mi Cuenta"}
+        <nav
+          style={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <a href="/" style={navLink}>
+            Inicio
+          </a>
+
+          <a href="/Vehiculos" style={navLink}>
+            Vehículos
+          </a>
+
+          {/* SOLO ADMIN */}
+          {isAdmin && (
+            <a
+              href="/Empleados"
+              style={{
+                ...navLink,
+                color: "#a78bfa",
+              }}
+            >
+              🔒 Admin
+            </a>
+          )}
+
+          {/* BOTÓN CUENTA */}
+          <a
+            href={
+              usuario
+                ? isAdmin
+                  ? "/Empleados"
+                  : "/perfil"
+                : "/login"
+            }
+            style={{
+              ...navLink,
+              backgroundColor: isAdmin
+                ? "#7c3aed"
+                : "#3b82f6",
+              padding: "0.55rem 1.2rem",
+              borderRadius: "20px",
+              color: "#fff",
+              marginLeft: "2rem",
+            }}
+          >
+            {usuario
+              ? `Hola, ${(usuario.nombre || "Usuario").split(" ")[0]}`
+              : "Mi Cuenta"}
           </a>
         </nav>
       </header>
 
-      <section style={{
-        height: "90vh", display: "flex", flexDirection: "column", 
-        justifyContent: "center", alignItems: "center", textAlign: "center",
-        backgroundImage: "linear-gradient(rgba(0,0,0,0.7), #000), url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1920')",
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}>
-        <h1 style={{ fontSize: "4rem", marginBottom: "1rem", fontWeight: "800" }}>Conduce el Futuro</h1>
-        <p style={{ color: "#aaa", maxWidth: "600px", fontSize: "1.1rem", lineHeight: "1.5" }}>
-          La plataforma inteligente para gestionar tu próximo vehículo con la tecnología de IAuto.
-        </p>
-        <button 
-          onClick={() => window.location.href = "/Vehiculos"}
-          style={{ 
-            marginTop: "2rem", padding: "1rem 2rem", backgroundColor: "#fff", 
-            color: "#000", border: "none", borderRadius: "30px", 
-            fontWeight: "bold", cursor: "pointer", fontSize: "1rem" 
+      {/* HERO */}
+      <section
+        style={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          padding: "0 2rem",
+          backgroundImage:
+            "linear-gradient(rgba(0,0,0,0.65), #000), url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1920')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <p
+          style={{
+            color: "#3b82f6",
+            fontSize: "0.85rem",
+            letterSpacing: "4px",
+            textTransform: "uppercase",
+            marginBottom: "1rem",
           }}
         >
-          {usuario ? "Continuar Buscando" : "Ver Inventario"}
-        </button>
+          La plataforma del futuro
+        </p>
+
+        <h1
+          style={{
+            fontSize: "clamp(2.5rem, 6vw, 5rem)",
+            fontWeight: "800",
+            marginBottom: "1rem",
+          }}
+        >
+          Conduce el Futuro
+        </h1>
+
+        <p
+          style={{
+            color: "#777",
+            maxWidth: "550px",
+            lineHeight: "1.8",
+            fontSize: "1.1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          La plataforma inteligente para gestionar tu próximo
+          vehículo con la tecnología de IAuto.
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          <button
+            onClick={() =>
+              (window.location.href = "/Vehiculos")
+            }
+            style={{
+              padding: "1rem 2.4rem",
+              borderRadius: "30px",
+              border: "none",
+              backgroundColor: "#fff",
+              color: "#000",
+              fontWeight: "700",
+              cursor: "pointer",
+            }}
+          >
+            {usuario
+              ? "Continuar Buscando"
+              : "Ver Inventario"}
+          </button>
+
+          {!usuario && (
+            <button
+              onClick={() =>
+                (window.location.href = "/login")
+              }
+              style={{
+                padding: "1rem 2.4rem",
+                borderRadius: "30px",
+                border: "1px solid #333",
+                backgroundColor: "transparent",
+                color: "#fff",
+                fontWeight: "700",
+                cursor: "pointer",
+              }}
+            >
+              Iniciar Sesión
+            </button>
+          )}
+        </div>
       </section>
 
-      <section id="nosotros" style={{ padding: "8rem 4rem", maxWidth: "1000px", margin: "0 auto", textAlign: "center" }}>
-        <h2 style={{ color: "#3b82f6", fontSize: "2.5rem", marginBottom: "1.5rem" }}>¿Quién es IAuto?</h2>
-        <p style={{ lineHeight: "1.8", color: "#bbb", fontSize: "1.2rem" }}>
-          IAuto nace como un proyecto de innovación (TFG) diseñado para digitalizar por completo la experiencia 
-          de compra y gestión automotriz. Unimos a clientes y concesionarios en un entorno 
-          donde la transparencia y la rapidez son nuestra máxima prioridad.
+      {/* FEATURES */}
+      <section
+        style={{
+          padding: "7rem 4rem",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "4rem",
+          }}
+        >
+          <h2
+            style={{
+              color: "#3b82f6",
+              fontSize: "2.5rem",
+              marginBottom: "1rem",
+            }}
+          >
+            ¿Por qué IAuto?
+          </h2>
+
+          <p style={{ color: "#555" }}>
+            Todo lo que necesitas en un solo lugar
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(280px,1fr))",
+            gap: "2rem",
+          }}
+        >
+          {[
+            {
+              icon: "🔍",
+              title: "Catálogo completo",
+              desc: "Explora cientos de vehículos con filtros inteligentes.",
+            },
+            {
+              icon: "⚡",
+              title: "Gestión rápida",
+              desc: "Proceso digital sin papeleo ni esperas.",
+            },
+            {
+              icon: "🛡️",
+              title: "100% seguro",
+              desc: "Datos protegidos y compras seguras.",
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              style={{
+                backgroundColor: "#0d0d0d",
+                border: "1px solid #1a1a1a",
+                borderRadius: "20px",
+                padding: "2rem",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "2.5rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                {item.icon}
+              </div>
+
+              <h3
+                style={{
+                  marginBottom: "1rem",
+                }}
+              >
+                {item.title}
+              </h3>
+
+              <p
+                style={{
+                  color: "#555",
+                  lineHeight: "1.7",
+                }}
+              >
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section
+        style={{
+          padding: "6rem 4rem",
+          backgroundColor: "#050505",
+          textAlign: "center",
+          borderTop: "1px solid #111",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "2rem",
+            marginBottom: "1rem",
+          }}
+        >
+          ¿Quién es IAuto?
+        </h2>
+
+        <p
+          style={{
+            color: "#666",
+            maxWidth: "750px",
+            margin: "0 auto",
+            lineHeight: "1.9",
+          }}
+        >
+          IAuto nace como proyecto TFG para digitalizar
+          completamente la experiencia de compra y gestión
+          automotriz.
         </p>
       </section>
 
-      <footer style={{ padding: "4rem", textAlign: "center", borderTop: "1px solid #111", color: "#444" }}>
-        © 2026 IAuto TFG Project
+      {/* FOOTER */}
+      <footer
+        style={{
+          padding: "3rem",
+          textAlign: "center",
+          borderTop: "1px solid #111",
+          color: "#333",
+          fontSize: "0.85rem",
+        }}
+      >
+        © 2026 IAuto TFG Project — Todos los derechos
+        reservados
       </footer>
     </div>
   );

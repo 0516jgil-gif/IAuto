@@ -8,41 +8,42 @@ generator client {
 }
 
 model Cliente {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  email     String   @unique
-  telefono  String
-  ventas    Venta[]
+  id       Int     @id @default(autoincrement())
+  nombre   String
+  email    String  @unique
+  telefono String
+  ventas   Venta[]
 }
 
 model Empleado {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  puesto    String
-  ventas    Venta[]
+  id     Int     @id @default(autoincrement())
+  nombre String
+  email  String  @unique
+  rol    String  @default("empleado")
+  ventas Venta[]
 }
 
 model Vehiculo {
-  id        Int      @id @default(autoincrement())
-  marca     String
-  modelo    String
-  precio    Float
-  stock     Int
-  ventas    Venta[]
+  id     Int     @id @default(autoincrement())
+  marca  String
+  modelo String
+  precio Float
+  stock  Int
+  ventas Venta[]
 }
 
 model Venta {
-  id          Int       @id @default(autoincrement())
-  fecha       DateTime  @default(now())
+  id    Int      @id @default(autoincrement())
+  fecha DateTime @default(now())
 
-  clienteId   Int
-  empleadoId  Int
-  vehiculoId  Int
+  clienteId  Int
+  empleadoId Int
+  vehiculoId Int
 
-  cliente     Cliente   @relation(fields: [clienteId], references: [id])
-  empleado    Empleado  @relation(fields: [empleadoId], references: [id])
-  vehiculo    Vehiculo  @relation(fields: [vehiculoId], references: [id])
+  cliente  Cliente  @relation(fields: [clienteId], references: [id])
+  empleado Empleado @relation(fields: [empleadoId], references: [id])
+  vehiculo Vehiculo @relation(fields: [vehiculoId], references: [id])
 
-  cantidad    Int
-  total       Float
+  cantidad Int
+  total    Float
 }

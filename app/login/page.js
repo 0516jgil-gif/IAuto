@@ -4,13 +4,26 @@ import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [formData, setFormData] = useState({ nombre: "", email: "", telefono: "" });
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = isLogin ? "/api/login" : "/api/Clientes";
-    const body = isLogin ? { email: formData.email } : formData;
+    setLoading(true);
+
+    let endpoint, body;
+    if (isAdmin) {
+      endpoint = "/api/admin-login";
+      body = { email: formData.email };
+    } else if (isLogin) {
+      endpoint = "/api/login";
+      body = { email: formData.email };
+    } else {
+      endpoint = "/api/Clientes";
+      body = formData;
+    }
 
     const res = await fetch(endpoint, {
       method: "POST",
@@ -20,35 +33,129 @@ export default function AuthPage() {
 
     if (res.ok) {
       const user = await res.json();
-      // SESIÓN: Guardamos ID y la hora actual
       localStorage.setItem("userId", user.id);
       localStorage.setItem("lastActivity", new Date().getTime().toString());
-      
-      router.push("/Vehiculos");
+      if (isAdmin) {
+        localStorage.setItem("userRol", "admin");
+        localStorage.setItem("userName", user.nombre);
+        router.push("/Empleados");
+      } else {
+        localStorage.setItem("userRol", "cliente");
+        router.push("/Vehiculos");
+      }
     } else {
-      alert(isLogin ? "Usuario no encontrado" : "Error al registrar");
+      const err = await res.json();
+      alert(err.error || "Error al iniciar sesión");
     }
+    setLoading(false);
+  };
+
+  const inputStyle = {
+    width: "100%", padding: "12px 16px", marginBottom: "1rem",
+    borderRadius: "10px", border: "1px solid #333",
+    backgroundColor: "#0a0a0a", color: "#fff",
+    boxSizing: "border-box", fontSize: "0.95rem",
+    outline: "none", transition: "border-color 0.2s",
   };
 
   return (
-    // ... (Mantén el mismo JSX que tenías antes para el formulario) ...
-    <div style={{ backgroundColor: "#000", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", color: "#fff", fontFamily: "sans-serif" }}>
-      <div style={{ backgroundColor: "#111", padding: "2.5rem", borderRadius: "15px", border: "1px solid #333", width: "90%", maxWidth: "400px" }}>
-        <h2 style={{ textAlign: "center", color: "#3b82f6", marginBottom: "1.5rem" }}>{isLogin ? "Login IAuto" : "Registro IAuto"}</h2>
+    <div style={{
+      backgroundColor: "#000", minHeight: "100vh",
+      display: "flex", justifyContent: "center", alignItems: "center",
+      color: "#fff", fontFamily: "sans-serif",
+      backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.15) 0%, transparent 60%)"
+    }}>
+      <div style={{
+        backgroundColor: "#0d0d0d", padding: "2.5rem",
+        borderRadius: "20px", border: "1px solid #1f1f1f",
+        width: "90%", maxWidth: "420px",
+        boxShadow: "0 25px 50px rgba(0,0,0,0.6)"
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <a href="/" style={{ fontSize: "1.8rem", fontWeight: "800", color: "#3b82f6", textDecoration: "none", letterSpacing: "2px" }}>
+            IAUTO
+          </a>
+        </div>
+
+        {/* Tabs: Cliente / Admin */}
+        <div style={{ display: "flex", marginBottom: "2rem", borderRadius: "12px", overflow: "hidden", border: "1px solid #222" }}>
+          <button onClick={() => setIsAdmin(false)} style={{
+            flex: 1, padding: "10px", border: "none", cursor: "pointer",
+            backgroundColor: !isAdmin ? "#3b82f6" : "#111",
+            color: !isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
+          }}>
+            Cliente
+          </button>
+          <button onClick={() => setIsAdmin(true)} style={{
+            flex: 1, padding: "10px", border: "none", cursor: "pointer",
+            backgroundColor: isAdmin ? "#7c3aed" : "#111",
+            color: isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
+          }}>
+            🔒 Admin
+          </button>
+        </div>
+
+        <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: "1.5rem", fontSize: "1.1rem", color: "#aaa" }}>
+          {isAdmin ? "Acceso de Administrador" : (isLogin ? "Bienvenido de vuelta" : "Crear cuenta")}
+        </h2>
+
         <form onSubmit={handleSubmit}>
-          {!isLogin && <input name="nombre" placeholder="Nombre" required style={inputStyle} onChange={(e) => setFormData({...formData, nombre: e.target.value})} />}
-          <input type="email" name="email" placeholder="Email" required style={inputStyle} onChange={(e) => setFormData({...formData, email: e.target.value})} />
-          {!isLogin && <input name="telefono" placeholder="Teléfono" required style={inputStyle} onChange={(e) => setFormData({...formData, telefono: e.target.value})} />}
-          <button type="submit" style={{ width: "100%", padding: "12px", backgroundColor: "#3b82f6", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
-            {isLogin ? "Entrar" : "Crear Cuenta"}
+          {!isLogin && !isAdmin && (
+            <input
+              placeholder="Nombre completo"
+              required
+              style={inputStyle}
+              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+            />
+          )}
+          <input
+            type="email"
+            placeholder={isAdmin ? "Email de empleado" : "Email"}
+            required
+            style={inputStyle}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          />
+          {!isLogin && !isAdmin && (
+            <input
+              placeholder="Teléfono"
+              required
+              style={inputStyle}
+              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+            />
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%", padding: "13px",
+              backgroundColor: isAdmin ? "#7c3aed" : "#3b82f6",
+              color: "#fff", border: "none", borderRadius: "10px",
+              cursor: "pointer", fontWeight: "700", fontSize: "1rem",
+              opacity: loading ? 0.7 : 1, transition: "opacity 0.2s"
+            }}
+          >
+            {loading ? "Cargando..." : (isAdmin ? "Acceder como Admin" : (isLogin ? "Entrar" : "Crear Cuenta"))}
           </button>
         </form>
-        <p onClick={() => setIsLogin(!isLogin)} style={{ textAlign: "center", marginTop: "1rem", cursor: "pointer", color: "#666" }}>
-          {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Login"}
+
+        {!isAdmin && (
+          <p onClick={() => setIsLogin(!isLogin)} style={{
+            textAlign: "center", marginTop: "1.2rem",
+            cursor: "pointer", color: "#555", fontSize: "0.9rem"
+          }}>
+            {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+            <span style={{ color: "#3b82f6" }}>{isLogin ? "Regístrate" : "Inicia sesión"}</span>
+          </p>
+        )}
+
+        <p onClick={() => router.push("/")} style={{
+          textAlign: "center", marginTop: "0.8rem",
+          cursor: "pointer", color: "#333", fontSize: "0.85rem"
+        }}>
+          ← Volver al inicio
         </p>
       </div>
     </div>
   );
 }
-
-const inputStyle = { width: "100%", padding: "12px", marginBottom: "1rem", borderRadius: "8px", border: "1px solid #444", backgroundColor: "#000", color: "#fff", boxSizing: "border-box" };
