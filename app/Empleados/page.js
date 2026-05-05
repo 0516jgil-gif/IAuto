@@ -262,6 +262,29 @@ export default function PanelAdmin() {
     color: active ? "#fff" : "#666",
   });
 
+  const tableHeaderStyle = (center = false) => ({
+    padding: "1rem 1.5rem",
+    textAlign: center ? "center" : "left",
+    color: "#555",
+    fontSize: "0.8rem",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+  });
+
+  const actionCellStyle = {
+    padding: "1rem 1.5rem",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const actionButtonsStyle = {
+    display: "flex",
+    gap: "0.5rem",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  };
+
   const statCards = [
     { label: "Clientes", value: data.clientes.length, icon: "👥", color: "#3b82f6" },
     { label: "Vehículos", value: data.vehiculos.length, icon: "🚗", color: "#10b981" },
@@ -371,7 +394,7 @@ export default function PanelAdmin() {
                 <thead>
                   <tr style={{ backgroundColor: "#111" }}>
                     {["ID", "Nombre", "Email", "Teléfono", "Acción"].map(h => (
-                      <th key={h} style={{ padding: "1rem 1.5rem", textAlign: "left", color: "#555", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px" }}>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
                         {h}
                       </th>
                     ))}
@@ -385,8 +408,8 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", fontWeight: "500" }}>{c.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#3b82f6" }}>{c.email}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{c.telefono}</td>
-                      <td style={{ padding: "1rem 1.5rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                      <td style={actionCellStyle}>
+                        <div style={actionButtonsStyle}>
                           <button
                             onClick={() => handleEditarCliente(c)}
                             title="Editar cliente"
@@ -425,7 +448,7 @@ export default function PanelAdmin() {
                 <thead>
                   <tr style={{ backgroundColor: "#111" }}>
                     {["ID", "Marca", "Modelo", "Precio", "Stock", "Acción"].map(h => (
-                      <th key={h} style={{ padding: "1rem 1.5rem", textAlign: "left", color: "#555", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px" }}>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
                         {h}
                       </th>
                     ))}
@@ -453,8 +476,8 @@ export default function PanelAdmin() {
                           {v.stock > 0 ? v.stock + " uds." : "Agotado"}
                         </span>
                       </td>
-                      <td style={{ padding: "1rem 1.5rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                      <td style={actionCellStyle}>
+                        <div style={actionButtonsStyle}>
                           <button
                             onClick={() => handleEditarVehiculo(v)}
                             title="Editar vehículo"
@@ -493,7 +516,7 @@ export default function PanelAdmin() {
                 <thead>
                   <tr style={{ backgroundColor: "#111" }}>
                     {["ID", "Cliente", "Empleado", "Vehículo", "Cant.", "Total", "Fecha", "Acción"].map(h => (
-                      <th key={h} style={{ padding: "1rem 1.5rem", textAlign: "left", color: "#555", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px" }}>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
                         {h}
                       </th>
                     ))}
@@ -514,8 +537,8 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>
                         {v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}
                       </td>
-                      <td style={{ padding: "1rem 1.5rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <td style={actionCellStyle}>
+                        <div style={actionButtonsStyle}>
                           <button
                             onClick={() => handleProcesarVenta(v)}
                             title="Procesar venta"
