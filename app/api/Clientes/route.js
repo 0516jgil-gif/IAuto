@@ -28,6 +28,44 @@ export async function GET() {
   }
 }
 
+export async function PUT(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = Number(searchParams.get("id"));
+    const body = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ error: "ID de cliente no válido" }, { status: 400 });
+    }
+
+    if (!body.nombre || !body.email || !body.telefono) {
+      return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
+    }
+
+    const cliente = await prisma.cliente.update({
+      where: { id },
+      data: {
+        nombre: body.nombre,
+        email: body.email,
+        telefono: body.telefono,
+      },
+    });
+
+    return NextResponse.json(cliente);
+  } catch (err) {
+    console.error(err);
+
+    if (err.code === "P2002") {
+      return NextResponse.json(
+        { error: "Ya existe un cliente con ese email." },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);

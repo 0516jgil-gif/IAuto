@@ -33,10 +33,18 @@ export default function PanelAdmin() {
     window.location.href = "/login";
   };
 
-  const buttonActionStyle = (type) => ({
-    backgroundColor: type === "ok" ? "#064e3b" : "#450a0a",
-    color: type === "ok" ? "#10b981" : "#ef4444",
-    border: `1px solid ${type === "ok" ? "#10b981" : "#ef4444"}`,
+  const buttonActionStyle = (type) => {
+    const colors = {
+      ok: { background: "#064e3b", color: "#10b981" },
+      edit: { background: "#172554", color: "#60a5fa" },
+      no: { background: "#450a0a", color: "#ef4444" },
+    };
+    const selected = colors[type] || colors.no;
+
+    return {
+    backgroundColor: selected.background,
+    color: selected.color,
+    border: `1px solid ${selected.color}`,
     width: "34px",
     height: "34px",
     borderRadius: "50%",
@@ -48,7 +56,85 @@ export default function PanelAdmin() {
     fontSize: "1rem",
     lineHeight: 1,
     padding: 0,
-  });
+    };
+  };
+
+  const handleEditarCliente = async (cliente) => {
+    const nombre = window.prompt("Nombre del cliente:", cliente.nombre || "");
+    if (nombre === null) return;
+
+    const email = window.prompt("Email del cliente:", cliente.email || "");
+    if (email === null) return;
+
+    const telefono = window.prompt("Teléfono del cliente:", cliente.telefono || "");
+    if (telefono === null) return;
+
+    try {
+      const res = await fetch(`/api/Clientes?id=${cliente.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, email, telefono }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || "No se pudo editar el cliente.");
+        return;
+      }
+
+      setData(prev => ({
+        ...prev,
+        clientes: prev.clientes.map(c => c.id === cliente.id ? result : c),
+      }));
+      alert("El cliente se ha editado correctamente.");
+    } catch (error) {
+      alert("Error al editar el cliente.");
+    }
+  };
+
+  const handleEditarVehiculo = async (vehiculo) => {
+    const marca = window.prompt("Marca del vehículo:", vehiculo.marca || "");
+    if (marca === null) return;
+
+    const modelo = window.prompt("Modelo del vehículo:", vehiculo.modelo || "");
+    if (modelo === null) return;
+
+    const precioTexto = window.prompt("Precio del vehículo:", String(vehiculo.precio ?? ""));
+    if (precioTexto === null) return;
+
+    const stockTexto = window.prompt("Stock del vehículo:", String(vehiculo.stock ?? ""));
+    if (stockTexto === null) return;
+
+    const precio = Number(precioTexto);
+    const stock = Number(stockTexto);
+
+    if (!marca.trim() || !modelo.trim() || Number.isNaN(precio) || Number.isNaN(stock)) {
+      alert("Datos no válidos. Revisa marca, modelo, precio y stock.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/Vehiculos?id=${vehiculo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marca, modelo, precio, stock }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || "No se pudo editar el vehículo.");
+        return;
+      }
+
+      setData(prev => ({
+        ...prev,
+        vehiculos: prev.vehiculos.map(v => v.id === vehiculo.id ? result : v),
+      }));
+      alert("El vehículo se ha editado correctamente.");
+    } catch (error) {
+      alert("Error al editar el vehículo.");
+    }
+  };
 
   const handleDenegarCliente = async (cliente) => {
     const confirmar = window.confirm(`¿Quieres denegar al cliente #${cliente.id}?`);
@@ -286,13 +372,23 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#3b82f6" }}>{c.email}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{c.telefono}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <button
-                          onClick={() => handleDenegarCliente(c)}
-                          title="Denegar cliente"
-                          style={buttonActionStyle("no")}
-                        >
-                          X
-                        </button>
+                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                          <button
+                            onClick={() => handleEditarCliente(c)}
+                            title="Editar cliente"
+                            style={buttonActionStyle("edit")}
+                          >
+                            ✎
+                          </button>
+
+                          <button
+                            onClick={() => handleDenegarCliente(c)}
+                            title="Denegar cliente"
+                            style={buttonActionStyle("no")}
+                          >
+                            X
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -344,13 +440,23 @@ export default function PanelAdmin() {
                         </span>
                       </td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <button
-                          onClick={() => handleDenegarVehiculo(v)}
-                          title="Denegar vehículo"
-                          style={buttonActionStyle("no")}
-                        >
-                          X
-                        </button>
+                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                          <button
+                            onClick={() => handleEditarVehiculo(v)}
+                            title="Editar vehículo"
+                            style={buttonActionStyle("edit")}
+                          >
+                            ✎
+                          </button>
+
+                          <button
+                            onClick={() => handleDenegarVehiculo(v)}
+                            title="Denegar vehículo"
+                            style={buttonActionStyle("no")}
+                          >
+                            X
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
