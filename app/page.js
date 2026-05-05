@@ -89,7 +89,7 @@ export default function InicioIAuto() {
             letterSpacing: "2px",
           }}
         >
-          IAUTO Pruebaaaaa
+          IAUTO Prueba de cuenta
         </div>
 
         <nav
