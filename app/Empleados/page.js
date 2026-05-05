@@ -41,23 +41,64 @@ export default function PanelAdmin() {
     height: "34px",
     borderRadius: "50%",
     cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     fontWeight: "800",
     fontSize: "1rem",
+    lineHeight: 1,
+    padding: 0,
   });
 
-  const handleDenegarCliente = (cliente) => {
+  const handleDenegarCliente = async (cliente) => {
     const confirmar = window.confirm(`¿Quieres denegar al cliente #${cliente.id}?`);
 
-    if (confirmar) {
-      alert("El cliente se ha denegado correctamente.");
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/Clientes?id=${cliente.id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || "No se pudo eliminar el cliente.");
+        return;
+      }
+
+      setData(prev => ({
+        ...prev,
+        clientes: prev.clientes.filter(c => c.id !== cliente.id),
+      }));
+      alert("El cliente se ha eliminado correctamente.");
+    } catch (error) {
+      alert("Error al eliminar el cliente.");
     }
   };
 
-  const handleDenegarVehiculo = (vehiculo) => {
+  const handleDenegarVehiculo = async (vehiculo) => {
     const confirmar = window.confirm(`¿Quieres denegar el vehículo #${vehiculo.id}?`);
 
-    if (confirmar) {
-      alert("El vehículo se ha denegado correctamente.");
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/Vehiculos?id=${vehiculo.id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || "No se pudo eliminar el vehículo.");
+        return;
+      }
+
+      setData(prev => ({
+        ...prev,
+        vehiculos: prev.vehiculos.filter(v => v.id !== vehiculo.id),
+      }));
+      alert("El vehículo se ha eliminado correctamente.");
+    } catch (error) {
+      alert("Error al eliminar el vehículo.");
     }
   };
 
@@ -69,11 +110,34 @@ export default function PanelAdmin() {
     }
   };
 
-  const handleDenegarVenta = (venta) => {
+  const handleDenegarVenta = async (venta) => {
     const confirmar = window.confirm(`¿Quieres denegar la venta #${venta.id}?`);
 
-    if (confirmar) {
-      alert("La venta se ha denegado correctamente.");
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/ventas?id=${venta.id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || "No se pudo eliminar la venta.");
+        return;
+      }
+
+      setData(prev => ({
+        ...prev,
+        ventas: prev.ventas.filter(v => v.id !== venta.id),
+        vehiculos: prev.vehiculos.map(vehiculo =>
+          vehiculo.id === venta.vehiculoId
+            ? { ...vehiculo, stock: vehiculo.stock + venta.cantidad }
+            : vehiculo
+        ),
+      }));
+      alert("La venta se ha eliminado correctamente.");
+    } catch (error) {
+      alert("Error al eliminar la venta.");
     }
   };
 

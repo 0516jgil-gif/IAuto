@@ -27,3 +27,31 @@ export async function GET() {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = Number(searchParams.get("id"));
+
+    if (!id) {
+      return NextResponse.json({ error: "ID de cliente no válido" }, { status: 400 });
+    }
+
+    await prisma.cliente.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+
+    if (err.code === "P2003") {
+      return NextResponse.json(
+        { error: "No se puede eliminar este cliente porque tiene ventas asociadas." },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

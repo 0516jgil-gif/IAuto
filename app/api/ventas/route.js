@@ -39,3 +39,41 @@ export async function POST(req) {
 
   return NextResponse.json(venta);
 }
+
+export async function DELETE(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = Number(searchParams.get("id"));
+
+    if (!id) {
+      return NextResponse.json({ error: "ID de venta no válido" }, { status: 400 });
+    }
+
+    const venta = await prisma.venta.findUnique({
+      where: { id },
+    });
+
+    if (!venta) {
+      return NextResponse.json({ error: "Venta no encontrada" }, { status: 404 });
+    }
+
+    await prisma.$transaction([
+      prisma.venta.delete({
+        where: { id },
+      }),
+      prisma.vehiculo.update({
+        where: { id: venta.vehiculoId },
+        data: {
+          stock: {
+            increment: venta.cantidad,
+          },
+        },
+      }),
+    ]);
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
