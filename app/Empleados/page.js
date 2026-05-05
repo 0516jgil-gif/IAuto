@@ -9,6 +9,8 @@ export default function PanelAdmin() {
   const [editingItem, setEditingItem] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [editSaving, setEditSaving] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(null);
+  const [deleteSaving, setDeleteSaving] = useState(false);
 
   useEffect(() => {
     const rol = localStorage.getItem("userRol");
@@ -150,55 +152,84 @@ export default function PanelAdmin() {
     }
   };
 
-  const handleDenegarCliente = async (cliente) => {
-    const confirmar = window.confirm(`¿Quieres denegar al cliente #${cliente.id}?`);
-
-    if (!confirmar) return;
-
-    try {
-      const res = await fetch(`/api/Clientes?id=${cliente.id}`, {
-        method: "DELETE",
-      });
-      const result = await res.json();
-
-      if (!res.ok) {
-        alert(result.error || "No se pudo eliminar el cliente.");
-        return;
-      }
-
-      setData(prev => ({
-        ...prev,
-        clientes: prev.clientes.filter(c => c.id !== cliente.id),
-      }));
-      alert("El cliente se ha eliminado correctamente.");
-    } catch (error) {
-      alert("Error al eliminar el cliente.");
-    }
+  const handleDenegarCliente = (cliente) => {
+    setDeleteItem({
+      type: "cliente",
+      id: cliente.id,
+      name: cliente.nombre || `Cliente #${cliente.id}`,
+    });
   };
 
-  const handleDenegarVehiculo = async (vehiculo) => {
-    const confirmar = window.confirm(`¿Quieres denegar el vehículo #${vehiculo.id}?`);
+  const handleDenegarVehiculo = (vehiculo) => {
+    setDeleteItem({
+      type: "vehiculo",
+      id: vehiculo.id,
+      name: `${vehiculo.marca || ""} ${vehiculo.modelo || ""}`.trim() || `Vehículo #${vehiculo.id}`,
+    });
+  };
 
-    if (!confirmar) return;
+  const handleDenegarVenta = (venta) => {
+    setDeleteItem({
+      type: "venta",
+      id: venta.id,
+      name: `${venta.cliente?.nombre || "Cliente"} - ${venta.vehiculo?.marca || ""} ${venta.vehiculo?.modelo || ""}`.trim(),
+      venta,
+    });
+  };
+
+  const handleCancelarBorrado = () => {
+    setDeleteItem(null);
+    setDeleteSaving(false);
+  };
+
+  const handleConfirmarBorrado = async () => {
+    if (!deleteItem) return;
+
+    const isCliente = deleteItem.type === "cliente";
+    const isVehiculo = deleteItem.type === "vehiculo";
+    const url = isCliente
+      ? `/api/Clientes?id=${deleteItem.id}`
+      : isVehiculo
+        ? `/api/Vehiculos?id=${deleteItem.id}`
+        : `/api/ventas?id=${deleteItem.id}`;
+
+    setDeleteSaving(true);
 
     try {
-      const res = await fetch(`/api/Vehiculos?id=${vehiculo.id}`, {
+      const res = await fetch(url, {
         method: "DELETE",
       });
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.error || "No se pudo eliminar el vehículo.");
+        alert(result.error || "No se pudo eliminar.");
+        setDeleteSaving(false);
         return;
       }
 
       setData(prev => ({
         ...prev,
-        vehiculos: prev.vehiculos.filter(v => v.id !== vehiculo.id),
+        clientes: isCliente
+          ? prev.clientes.filter(c => c.id !== deleteItem.id)
+          : prev.clientes,
+        vehiculos: isVehiculo
+          ? prev.vehiculos.filter(v => v.id !== deleteItem.id)
+          : deleteItem.type === "venta"
+            ? prev.vehiculos.map(vehiculo =>
+                vehiculo.id === deleteItem.venta.vehiculoId
+                  ? { ...vehiculo, stock: vehiculo.stock + deleteItem.venta.cantidad }
+                  : vehiculo
+              )
+            : prev.vehiculos,
+        ventas: deleteItem.type === "venta"
+          ? prev.ventas.filter(v => v.id !== deleteItem.id)
+          : prev.ventas,
       }));
-      alert("El vehículo se ha eliminado correctamente.");
+      handleCancelarBorrado();
+      alert("Se ha eliminado correctamente.");
     } catch (error) {
-      alert("Error al eliminar el vehículo.");
+      alert("Error al eliminar.");
+      setDeleteSaving(false);
     }
   };
 
@@ -210,36 +241,6 @@ export default function PanelAdmin() {
     }
   };
 
-  const handleDenegarVenta = async (venta) => {
-    const confirmar = window.confirm(`¿Quieres denegar la venta #${venta.id}?`);
-
-    if (!confirmar) return;
-
-    try {
-      const res = await fetch(`/api/ventas?id=${venta.id}`, {
-        method: "DELETE",
-      });
-      const result = await res.json();
-
-      if (!res.ok) {
-        alert(result.error || "No se pudo eliminar la venta.");
-        return;
-      }
-
-      setData(prev => ({
-        ...prev,
-        ventas: prev.ventas.filter(v => v.id !== venta.id),
-        vehiculos: prev.vehiculos.map(vehiculo =>
-          vehiculo.id === venta.vehiculoId
-            ? { ...vehiculo, stock: vehiculo.stock + venta.cantidad }
-            : vehiculo
-        ),
-      }));
-      alert("La venta se ha eliminado correctamente.");
-    } catch (error) {
-      alert("Error al eliminar la venta.");
-    }
-  };
 
   if (loading) return (
     <div style={{ backgroundColor: "#000", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", color: "#fff" }}>
@@ -688,6 +689,70 @@ export default function PanelAdmin() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {deleteItem && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.72)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "1rem",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            width: "100%",
+            maxWidth: "430px",
+            backgroundColor: "#0d0d0d",
+            border: "1px solid #7f1d1d",
+            borderRadius: "16px",
+            padding: "1.5rem",
+            boxShadow: "0 24px 70px rgba(0, 0, 0, 0.55)",
+          }}>
+            <h2 style={{ margin: "0 0 0.6rem", fontSize: "1.2rem" }}>
+              Confirmar borrado
+            </h2>
+
+            <p style={{ color: "#aaa", lineHeight: 1.5, margin: "0 0 1rem" }}>
+              ¿Seguro que quieres borrar {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : "la venta"}?
+            </p>
+
+            <div style={{
+              backgroundColor: "#050505",
+              border: "1px solid #262626",
+              borderRadius: "10px",
+              padding: "0.9rem",
+              color: "#fff",
+              fontWeight: "800",
+              marginBottom: "1.2rem",
+              textAlign: "center",
+            }}>
+              {deleteItem.name}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
+              <button
+                type="button"
+                onClick={handleCancelarBorrado}
+                disabled={deleteSaving}
+                style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmarBorrado}
+                disabled={deleteSaving}
+                style={{ backgroundColor: "#991b1b", border: "1px solid #ef4444", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+              >
+                {deleteSaving ? "Borrando..." : "Aceptar"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
