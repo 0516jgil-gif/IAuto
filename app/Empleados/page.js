@@ -6,6 +6,9 @@ export default function PanelAdmin() {
   const [loading, setLoading] = useState(true);
   const [adminName, setAdminName] = useState("");
   const [tab, setTab] = useState("clientes");
+  const [editingItem, setEditingItem] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     const rol = localStorage.getItem("userRol");
@@ -59,80 +62,91 @@ export default function PanelAdmin() {
     };
   };
 
-  const handleEditarCliente = async (cliente) => {
-    const nombre = window.prompt("Nombre del cliente:", cliente.nombre || "");
-    if (nombre === null) return;
-
-    const email = window.prompt("Email del cliente:", cliente.email || "");
-    if (email === null) return;
-
-    const telefono = window.prompt("Teléfono del cliente:", cliente.telefono || "");
-    if (telefono === null) return;
-
-    try {
-      const res = await fetch(`/api/Clientes?id=${cliente.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, email, telefono }),
-      });
-      const result = await res.json();
-
-      if (!res.ok) {
-        alert(result.error || "No se pudo editar el cliente.");
-        return;
-      }
-
-      setData(prev => ({
-        ...prev,
-        clientes: prev.clientes.map(c => c.id === cliente.id ? result : c),
-      }));
-      alert("El cliente se ha editado correctamente.");
-    } catch (error) {
-      alert("Error al editar el cliente.");
-    }
+  const handleEditarCliente = (cliente) => {
+    setEditingItem({ type: "cliente", id: cliente.id });
+    setEditForm({
+      nombre: cliente.nombre || "",
+      email: cliente.email || "",
+      telefono: cliente.telefono || "",
+    });
   };
 
-  const handleEditarVehiculo = async (vehiculo) => {
-    const marca = window.prompt("Marca del vehículo:", vehiculo.marca || "");
-    if (marca === null) return;
+  const handleEditarVehiculo = (vehiculo) => {
+    setEditingItem({ type: "vehiculo", id: vehiculo.id });
+    setEditForm({
+      marca: vehiculo.marca || "",
+      modelo: vehiculo.modelo || "",
+      precio: String(vehiculo.precio ?? ""),
+      stock: String(vehiculo.stock ?? ""),
+    });
+  };
 
-    const modelo = window.prompt("Modelo del vehículo:", vehiculo.modelo || "");
-    if (modelo === null) return;
+  const handleCancelarEdicion = () => {
+    setEditingItem(null);
+    setEditForm({});
+    setEditSaving(false);
+  };
 
-    const precioTexto = window.prompt("Precio del vehículo:", String(vehiculo.precio ?? ""));
-    if (precioTexto === null) return;
+  const handleGuardarEdicion = async (e) => {
+    e.preventDefault();
 
-    const stockTexto = window.prompt("Stock del vehículo:", String(vehiculo.stock ?? ""));
-    if (stockTexto === null) return;
+    if (!editingItem) return;
 
-    const precio = Number(precioTexto);
-    const stock = Number(stockTexto);
+    const isCliente = editingItem.type === "cliente";
+    const url = isCliente ? `/api/Clientes?id=${editingItem.id}` : `/api/Vehiculos?id=${editingItem.id}`;
+    const payload = isCliente
+      ? {
+          nombre: editForm.nombre.trim(),
+          email: editForm.email.trim(),
+          telefono: editForm.telefono.trim(),
+        }
+      : {
+          marca: editForm.marca.trim(),
+          modelo: editForm.modelo.trim(),
+          precio: Number(editForm.precio),
+          stock: Number(editForm.stock),
+        };
 
-    if (!marca.trim() || !modelo.trim() || Number.isNaN(precio) || Number.isNaN(stock)) {
-      alert("Datos no válidos. Revisa marca, modelo, precio y stock.");
+    if (isCliente && (!payload.nombre || !payload.email || !payload.telefono)) {
+      alert("Completa nombre, email y teléfono.");
       return;
     }
 
+    if (!isCliente && (!payload.marca || !payload.modelo || Number.isNaN(payload.precio) || Number.isNaN(payload.stock))) {
+      alert("Completa marca, modelo, precio y stock con datos válidos.");
+      return;
+    }
+
+    setEditSaving(true);
+
     try {
-      const res = await fetch(`/api/Vehiculos?id=${vehiculo.id}`, {
+      const res = await fetch(url, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ marca, modelo, precio, stock }),
+        body: JSON.stringify(payload),
       });
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.error || "No se pudo editar el vehículo.");
+        alert(result.error || "No se pudo guardar la edición.");
+        setEditSaving(false);
         return;
       }
 
       setData(prev => ({
         ...prev,
-        vehiculos: prev.vehiculos.map(v => v.id === vehiculo.id ? result : v),
+        clientes: isCliente
+          ? prev.clientes.map(c => c.id === editingItem.id ? result : c)
+          : prev.clientes,
+        vehiculos: isCliente
+          ? prev.vehiculos
+          : prev.vehiculos.map(v => v.id === editingItem.id ? result : v),
       }));
-      alert("El vehículo se ha editado correctamente.");
+      handleCancelarEdicion();
+      alert(isCliente ? "El cliente se ha editado correctamente." : "El vehículo se ha editado correctamente.");
     } catch (error) {
-      alert("Error al editar el vehículo.");
+      alert(isCliente ? "Error al editar el cliente." : "Error al editar el vehículo.");
+      setEditSaving(false);
     }
   };
 
@@ -527,6 +541,132 @@ export default function PanelAdmin() {
           </div>
         )}
       </main>
+
+      {editingItem && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.72)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "1rem",
+          zIndex: 1000,
+        }}>
+          <form
+            onSubmit={handleGuardarEdicion}
+            style={{
+              width: "100%",
+              maxWidth: "460px",
+              backgroundColor: "#0d0d0d",
+              border: "1px solid #262626",
+              borderRadius: "16px",
+              padding: "1.5rem",
+              boxShadow: "0 24px 70px rgba(0, 0, 0, 0.55)",
+            }}
+          >
+            <h2 style={{ margin: "0 0 1rem", fontSize: "1.2rem" }}>
+              {editingItem.type === "cliente" ? "Editar cliente" : "Editar vehículo"}
+            </h2>
+
+            <div style={{ display: "grid", gap: "0.9rem" }}>
+              {editingItem.type === "cliente" ? (
+                <>
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Nombre
+                    <input
+                      value={editForm.nombre || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, nombre: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Email
+                    <input
+                      type="email"
+                      value={editForm.email || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Teléfono
+                    <input
+                      value={editForm.telefono || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, telefono: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Marca
+                    <input
+                      value={editForm.marca || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, marca: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Modelo
+                    <input
+                      value={editForm.modelo || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, modelo: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Precio
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={editForm.precio || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, precio: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                    Stock
+                    <input
+                      type="number"
+                      min="0"
+                      value={editForm.stock || ""}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, stock: e.target.value }))}
+                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
+                    />
+                  </label>
+                </>
+              )}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.5rem" }}>
+              <button
+                type="button"
+                onClick={handleCancelarEdicion}
+                disabled={editSaving}
+                style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                disabled={editSaving}
+                style={{ backgroundColor: "#2563eb", border: "1px solid #60a5fa", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+              >
+                {editSaving ? "Guardando..." : "Aceptar"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
