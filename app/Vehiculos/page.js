@@ -7,6 +7,7 @@ export default function ListaVehiculos() {
   const [isLogged, setIsLogged] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState(null);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -41,6 +42,18 @@ export default function ListaVehiculos() {
     } else {
       alert(`✅ ${accion.charAt(0).toUpperCase() + accion.slice(1)} registrado correctamente.`);
     }
+  };
+
+  const getKilometros = (vehiculo) =>
+    vehiculo?.kmRecorridos ?? vehiculo?.kilometros ?? vehiculo?.km ?? vehiculo?.kilometraje;
+
+  const getTipo = (vehiculo) =>
+    vehiculo?.tipo ?? vehiculo?.categoria ?? vehiculo?.carroceria;
+
+  const getFotos = (vehiculo) => {
+    const fotos = vehiculo?.fotos ?? vehiculo?.imagenes;
+    if (Array.isArray(fotos)) return fotos.filter(Boolean);
+    return [vehiculo?.foto, vehiculo?.imagen, vehiculo?.imageUrl].filter(Boolean);
   };
 
   const filtrados = vehiculos.filter(v =>
@@ -108,10 +121,11 @@ export default function ListaVehiculos() {
         {/* Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
           {filtrados.map(v => (
-            <div key={v.id} style={{
+            <div key={v.id} onClick={() => setVehiculoSeleccionado(v)} style={{
               backgroundColor: "#0d0d0d", borderRadius: "18px",
               border: "1px solid #1a1a1a", overflow: "hidden",
               transition: "transform 0.2s, border-color 0.2s",
+              cursor: "pointer",
             }}
               onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "#3b82f6"; }}
               onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "#1a1a1a"; }}
@@ -136,7 +150,7 @@ export default function ListaVehiculos() {
                 <p style={{ color: "#3b82f6", fontWeight: "700", fontSize: "1.3rem", margin: "0.5rem 0 1rem" }}>
                   {v.precio?.toLocaleString()} €
                 </p>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", gap: "8px" }}>
                   <button
                     onClick={() => handleAccion("comprar este vehículo")}
                     disabled={v.stock === 0}
@@ -167,6 +181,217 @@ export default function ListaVehiculos() {
           </div>
         )}
       </main>
+
+      {vehiculoSeleccionado && (
+        <div
+          onClick={() => setVehiculoSeleccionado(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.78)",
+            backdropFilter: "blur(10px)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.5rem",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(920px, 100%)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              backgroundColor: "#080808",
+              border: "1px solid #1f2937",
+              borderRadius: "22px",
+              boxShadow: "0 24px 90px rgba(59,130,246,0.18)",
+            }}
+          >
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: "1.5rem",
+              padding: "1.5rem",
+            }}>
+              <div>
+                <div style={{
+                  height: "320px",
+                  borderRadius: "18px",
+                  overflow: "hidden",
+                  border: "1px solid #1a1a1a",
+                  backgroundColor: "#111",
+                  backgroundImage: "radial-gradient(circle at 50% 45%, #1e3a8a 0%, #111827 36%, #050505 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  {getFotos(vehiculoSeleccionado)[0] ? (
+                    <div
+                      aria-label={`${vehiculoSeleccionado.marca} ${vehiculoSeleccionado.modelo}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        backgroundImage: `url(${getFotos(vehiculoSeleccionado)[0]})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "5rem" }}>🚗</span>
+                  )}
+                </div>
+
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "0.75rem",
+                  marginTop: "0.75rem",
+                }}>
+                  {(getFotos(vehiculoSeleccionado).slice(1, 4).length > 0
+                    ? getFotos(vehiculoSeleccionado).slice(1, 4)
+                    : [null, null, null]
+                  ).map((foto, index) => (
+                    <div key={index} style={{
+                      height: "86px",
+                      borderRadius: "14px",
+                      border: "1px solid #1a1a1a",
+                      backgroundColor: "#101010",
+                      backgroundImage: foto ? "none" : "linear-gradient(135deg, #111827, #050505)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      color: "#374151",
+                      fontSize: "1.6rem",
+                    }}>
+                      {foto ? (
+                        <div
+                          aria-label={`Foto ${index + 2} de ${vehiculoSeleccionado.marca} ${vehiculoSeleccionado.modelo}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            backgroundImage: `url(${foto})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }}
+                        />
+                      ) : "🚘"}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: "0.25rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start" }}>
+                  <div>
+                    <p style={{ color: "#3b82f6", margin: "0 0 0.35rem", fontSize: "0.78rem", fontWeight: "800", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+                      Detalle del vehiculo
+                    </p>
+                    <h2 style={{ margin: 0, fontSize: "2rem", lineHeight: 1.1 }}>
+                      {vehiculoSeleccionado.marca} {vehiculoSeleccionado.modelo}
+                    </h2>
+                  </div>
+                  <button
+                    onClick={() => setVehiculoSeleccionado(null)}
+                    aria-label="Cerrar ventana"
+                    style={{
+                      minWidth: "38px",
+                      height: "38px",
+                      borderRadius: "50%",
+                      border: "1px solid #222",
+                      backgroundColor: "#111",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <p style={{ color: "#3b82f6", fontWeight: "800", fontSize: "1.9rem", margin: "1.1rem 0" }}>
+                  {vehiculoSeleccionado.precio?.toLocaleString()} €
+                </p>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.8rem", marginBottom: "1.2rem" }}>
+                  {[
+                    { label: "Marca", value: vehiculoSeleccionado.marca },
+                    { label: "Tipo", value: getTipo(vehiculoSeleccionado) || "No disponible" },
+                    {
+                      label: "Km recorridos",
+                      value: getKilometros(vehiculoSeleccionado) != null
+                        ? `${Number(getKilometros(vehiculoSeleccionado)).toLocaleString()} km`
+                        : "No disponible"
+                    },
+                    { label: "Stock", value: vehiculoSeleccionado.stock > 0 ? `${vehiculoSeleccionado.stock} uds.` : "Agotado" },
+                  ].map(({ label, value }) => (
+                    <div key={label} style={{
+                      backgroundColor: "#0d0d0d",
+                      border: "1px solid #1a1a1a",
+                      borderRadius: "14px",
+                      padding: "0.9rem",
+                    }}>
+                      <p style={{ color: "#555", margin: "0 0 0.35rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "700" }}>
+                        {label}
+                      </p>
+                      <p style={{ color: "#fff", margin: 0, fontWeight: "700", fontSize: "0.98rem" }}>
+                        {value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{
+                  borderTop: "1px solid #1a1a1a",
+                  paddingTop: "1rem",
+                  marginTop: "0.5rem",
+                }}>
+                  <p style={{ color: "#777", lineHeight: 1.6, margin: "0 0 1.2rem", fontSize: "0.94rem" }}>
+                    Consulta la informacion principal del vehiculo antes de comprarlo o guardarlo en favoritos.
+                  </p>
+
+                  <div style={{ display: "flex", gap: "0.7rem" }}>
+                    <button
+                      onClick={() => handleAccion("comprar este vehÃ­culo")}
+                      disabled={vehiculoSeleccionado.stock === 0}
+                      style={{
+                        flex: 2,
+                        padding: "12px",
+                        backgroundColor: vehiculoSeleccionado.stock > 0 ? "#fff" : "#222",
+                        color: vehiculoSeleccionado.stock > 0 ? "#000" : "#555",
+                        border: "none",
+                        borderRadius: "12px",
+                        fontWeight: "800",
+                        cursor: vehiculoSeleccionado.stock > 0 ? "pointer" : "not-allowed",
+                        fontSize: "0.95rem",
+                      }}
+                    >
+                      Comprar
+                    </button>
+                    <button
+                      onClick={() => handleAccion("guardar en favoritos")}
+                      style={{
+                        flex: 1,
+                        padding: "12px",
+                        backgroundColor: "#111",
+                        border: "1px solid #222",
+                        color: "#fff",
+                        borderRadius: "12px",
+                        cursor: "pointer",
+                        fontSize: "1.05rem",
+                      }}
+                    >
+                      ❤️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
