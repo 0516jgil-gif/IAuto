@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 
 export default function PanelAdmin() {
@@ -21,7 +21,7 @@ export default function PanelAdmin() {
     Promise.all([
       fetch("/api/Clientes").then(r => r.json()),
       fetch("/api/Vehiculos").then(r => r.json()),
-      fetch("/api/Ventas").then(r => r.json()),
+      fetch("/api/ventas").then(r => r.json()),
     ]).then(([clientes, vehiculos, ventas]) => {
       setData({ clientes, vehiculos, ventas });
       setLoading(false);
@@ -45,27 +45,11 @@ export default function PanelAdmin() {
     fontSize: "1rem",
   });
 
-  const handleProcesarCliente = (cliente) => {
-    const confirmar = window.confirm(`¿Quieres aceptar al cliente #${cliente.id}?`);
-
-    if (confirmar) {
-      alert("El cliente se ha aceptado correctamente.");
-    }
-  };
-
   const handleDenegarCliente = (cliente) => {
     const confirmar = window.confirm(`¿Quieres denegar al cliente #${cliente.id}?`);
 
     if (confirmar) {
       alert("El cliente se ha denegado correctamente.");
-    }
-  };
-
-  const handleProcesarVehiculo = (vehiculo) => {
-    const confirmar = window.confirm(`¿Quieres aceptar el vehículo #${vehiculo.id}?`);
-
-    if (confirmar) {
-      alert("El vehículo se ha aceptado correctamente.");
     }
   };
 
@@ -128,7 +112,6 @@ export default function PanelAdmin() {
 
   return (
     <div style={{ backgroundColor: "#050505", minHeight: "100vh", color: "#fff", fontFamily: "sans-serif" }}>
-
       <header style={{
         display: "flex",
         justifyContent: "space-between",
@@ -239,23 +222,13 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#3b82f6" }}>{c.email}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{c.telefono}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <button
-                            onClick={() => handleProcesarCliente(c)}
-                            title="Aceptar cliente"
-                            style={buttonActionStyle("ok")}
-                          >
-                            ✓
-                          </button>
-
-                          <button
-                            onClick={() => handleDenegarCliente(c)}
-                            title="Denegar cliente"
-                            style={buttonActionStyle("no")}
-                          >
-                            X
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleDenegarCliente(c)}
+                          title="Denegar cliente"
+                          style={buttonActionStyle("no")}
+                        >
+                          X
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -307,23 +280,13 @@ export default function PanelAdmin() {
                         </span>
                       </td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <button
-                            onClick={() => handleProcesarVehiculo(v)}
-                            title="Aceptar vehículo"
-                            style={buttonActionStyle("ok")}
-                          >
-                            ✓
-                          </button>
-
-                          <button
-                            onClick={() => handleDenegarVehiculo(v)}
-                            title="Denegar vehículo"
-                            style={buttonActionStyle("no")}
-                          >
-                            X
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleDenegarVehiculo(v)}
+                          title="Denegar vehículo"
+                          style={buttonActionStyle("no")}
+                        >
+                          X
+                        </button>
                       </td>
                     </tr>
                   ))}
