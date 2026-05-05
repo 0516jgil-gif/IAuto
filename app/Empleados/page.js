@@ -505,13 +505,13 @@ export default function PanelAdmin() {
                 Inventario de Vehículos ({filteredVehiculos.length})
               </h3>
 
-              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "nowrap" }}>
                 <input
                   type="search"
                   value={vehiculoSearch}
                   onChange={(e) => setVehiculoSearch(e.target.value)}
                   placeholder="Buscar vehículo..."
-                  style={searchInputStyle}
+                  style={{ ...searchInputStyle, width: "250px", maxWidth: "250px" }}
                 />
 
                 <button
