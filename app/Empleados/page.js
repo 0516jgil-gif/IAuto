@@ -42,6 +42,7 @@ export default function PanelAdmin() {
     const colors = {
       ok: { background: "#064e3b", color: "#10b981" },
       edit: { background: "#172554", color: "#60a5fa" },
+      add: { background: "#064e3b", color: "#34d399" },
       no: { background: "#450a0a", color: "#ef4444" },
     };
     const selected = colors[type] || colors.no;
@@ -83,6 +84,16 @@ export default function PanelAdmin() {
     });
   };
 
+  const handleCrearVehiculo = () => {
+    setEditingItem({ type: "vehiculoNuevo" });
+    setEditForm({
+      marca: "",
+      modelo: "",
+      precio: "",
+      stock: "",
+    });
+  };
+
   const handleCancelarEdicion = () => {
     setEditingItem(null);
     setEditForm({});
@@ -95,7 +106,12 @@ export default function PanelAdmin() {
     if (!editingItem) return;
 
     const isCliente = editingItem.type === "cliente";
-    const url = isCliente ? `/api/Clientes?id=${editingItem.id}` : `/api/Vehiculos?id=${editingItem.id}`;
+    const isNewVehiculo = editingItem.type === "vehiculoNuevo";
+    const url = isCliente
+      ? `/api/Clientes?id=${editingItem.id}`
+      : isNewVehiculo
+        ? "/api/Vehiculos"
+        : `/api/Vehiculos?id=${editingItem.id}`;
     const payload = isCliente
       ? {
           nombre: editForm.nombre.trim(),
@@ -123,7 +139,7 @@ export default function PanelAdmin() {
 
     try {
       const res = await fetch(url, {
-        method: "PUT",
+        method: isNewVehiculo ? "POST" : "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -142,12 +158,14 @@ export default function PanelAdmin() {
           : prev.clientes,
         vehiculos: isCliente
           ? prev.vehiculos
-          : prev.vehiculos.map(v => v.id === editingItem.id ? result : v),
+          : isNewVehiculo
+            ? [...prev.vehiculos, result]
+            : prev.vehiculos.map(v => v.id === editingItem.id ? result : v),
       }));
       handleCancelarEdicion();
-      alert(isCliente ? "El cliente se ha editado correctamente." : "El vehículo se ha editado correctamente.");
+      alert(isCliente ? "El cliente se ha editado correctamente." : isNewVehiculo ? "El vehículo se ha añadido correctamente." : "El vehículo se ha editado correctamente.");
     } catch (error) {
-      alert(isCliente ? "Error al editar el cliente." : "Error al editar el vehículo.");
+      alert(isCliente ? "Error al editar el cliente." : isNewVehiculo ? "Error al añadir el vehículo." : "Error al editar el vehículo.");
       setEditSaving(false);
     }
   };
@@ -438,10 +456,18 @@ export default function PanelAdmin() {
 
         {tab === "vehiculos" && (
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
-            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a" }}>
+            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
               <h3 style={{ margin: 0, fontSize: "1rem" }}>
                 Inventario de Vehículos ({data.vehiculos.length})
               </h3>
+
+              <button
+                onClick={handleCrearVehiculo}
+                title="Añadir vehículo"
+                style={buttonActionStyle("add")}
+              >
+                +
+              </button>
             </div>
 
             <div style={{ overflowX: "auto" }}>
@@ -590,7 +616,7 @@ export default function PanelAdmin() {
             }}
           >
             <h2 style={{ margin: "0 0 1rem", fontSize: "1.2rem" }}>
-              {editingItem.type === "cliente" ? "Editar cliente" : "Editar vehículo"}
+              {editingItem.type === "cliente" ? "Editar cliente" : editingItem.type === "vehiculoNuevo" ? "Añadir vehículo" : "Editar vehículo"}
             </h2>
 
             <div style={{ display: "grid", gap: "0.9rem" }}>
