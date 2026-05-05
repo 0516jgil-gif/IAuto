@@ -11,6 +11,8 @@ export default function PanelAdmin() {
   const [editSaving, setEditSaving] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleteSaving, setDeleteSaving] = useState(false);
+  const [clienteSearch, setClienteSearch] = useState("");
+  const [vehiculoSearch, setVehiculoSearch] = useState("");
 
   useEffect(() => {
     const rol = localStorage.getItem("userRol");
@@ -304,6 +306,40 @@ export default function PanelAdmin() {
     width: "100%",
   };
 
+  const searchInputStyle = {
+    width: "100%",
+    maxWidth: "320px",
+    backgroundColor: "#050505",
+    border: "1px solid #333",
+    color: "#fff",
+    borderRadius: "8px",
+    padding: "0.65rem 0.85rem",
+    fontSize: "0.9rem",
+    outline: "none",
+  };
+
+  const clienteSearchText = clienteSearch.trim().toLowerCase();
+  const vehiculoSearchText = vehiculoSearch.trim().toLowerCase();
+
+  const filteredClientes = data.clientes.filter(cliente =>
+    [
+      cliente.id,
+      cliente.nombre,
+      cliente.email,
+      cliente.telefono,
+    ].some(value => String(value || "").toLowerCase().includes(clienteSearchText))
+  );
+
+  const filteredVehiculos = data.vehiculos.filter(vehiculo =>
+    [
+      vehiculo.id,
+      vehiculo.marca,
+      vehiculo.modelo,
+      vehiculo.precio,
+      vehiculo.stock,
+    ].some(value => String(value || "").toLowerCase().includes(vehiculoSearchText))
+  );
+
   const statCards = [
     { label: "Clientes", value: data.clientes.length, icon: "👥", color: "#3b82f6" },
     { label: "Vehículos", value: data.vehiculos.length, icon: "🚗", color: "#10b981" },
@@ -402,10 +438,18 @@ export default function PanelAdmin() {
 
         {tab === "clientes" && (
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
-            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a" }}>
+            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               <h3 style={{ margin: 0, fontSize: "1rem" }}>
-                Lista de Clientes ({data.clientes.length})
+                Lista de Clientes ({filteredClientes.length})
               </h3>
+
+              <input
+                type="search"
+                value={clienteSearch}
+                onChange={(e) => setClienteSearch(e.target.value)}
+                placeholder="Buscar cliente..."
+                style={searchInputStyle}
+              />
             </div>
 
             <div style={{ overflowX: "auto" }}>
@@ -421,7 +465,7 @@ export default function PanelAdmin() {
                 </thead>
 
                 <tbody>
-                  {data.clientes.map((c, i) => (
+                  {filteredClientes.map((c, i) => (
                     <tr key={c.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{c.id}</td>
                       <td style={{ padding: "1rem 1.5rem", fontWeight: "500" }}>{c.nombre}</td>
@@ -456,18 +500,28 @@ export default function PanelAdmin() {
 
         {tab === "vehiculos" && (
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
-            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               <h3 style={{ margin: 0, fontSize: "1rem" }}>
-                Inventario de Vehículos ({data.vehiculos.length})
+                Inventario de Vehículos ({filteredVehiculos.length})
               </h3>
 
-              <button
-                onClick={handleCrearVehiculo}
-                title="Añadir vehículo"
-                style={buttonActionStyle("add")}
-              >
-                +
-              </button>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+                <input
+                  type="search"
+                  value={vehiculoSearch}
+                  onChange={(e) => setVehiculoSearch(e.target.value)}
+                  placeholder="Buscar vehículo..."
+                  style={searchInputStyle}
+                />
+
+                <button
+                  onClick={handleCrearVehiculo}
+                  title="Añadir vehículo"
+                  style={buttonActionStyle("add")}
+                >
+                  +
+                </button>
+              </div>
             </div>
 
             <div style={{ overflowX: "auto" }}>
@@ -483,7 +537,7 @@ export default function PanelAdmin() {
                 </thead>
 
                 <tbody>
-                  {data.vehiculos.map((v, i) => (
+                  {filteredVehiculos.map((v, i) => (
                     <tr key={v.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{v.id}</td>
                       <td style={{ padding: "1rem 1.5rem", fontWeight: "600" }}>{v.marca}</td>
