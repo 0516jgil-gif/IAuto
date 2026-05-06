@@ -17,11 +17,27 @@ export async function POST(req) {
       return NextResponse.json({ error: "No tienes permisos de administrador" }, { status: 403 });
     }
 
+    // Si tiene contraseña hasheada, compara con bcrypt
+    // Si tiene contraseña en texto plano (sin $2b$), compara directamente
+    let passwordOk = false;
     if (empleado.password) {
-      const passwordOk = await bcrypt.compare(password, empleado.password);
-      if (!passwordOk) {
-        return NextResponse.json({ error: "Contraseña incorrecta" }, { status: 401 });
+      if (empleado.password.startsWith("$2b$") || empleado.password.startsWith("$2a$")) {
+        passwordOk = await bcrypt.compare(password, empleado.password);
+      } else {
+        // Contraseña en texto plano (para compatibilidad inicial)
+        passwordOk = empleado.password === password;
+        // Aprovechamos para hashearla automáticamente
+        if (passwordOk) {
+          const hashed = await bcrypt.hash(password, 10);
+          await prisma.empleado.update({ where: { email }, data: { password: hashed } });
+        }
       }
+    } else {
+      return NextResponse.json({ error: "El admin no tiene contraseña configurada" }, { status: 401 });
+    }
+
+    if (!passwordOk) {
+      return NextResponse.json({ error: "Contraseña incorrecta" }, { status: 401 });
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -30,6 +46,7 @@ export async function POST(req) {
 
     return NextResponse.json({ email: empleado.email, nombre: empleado.nombre, rol: empleado.rol, pendingVerification: true });
   } catch (err) {
-    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
+    console.error("Error admin-login:", err);
+    return NextResponse.json({ error: "Error en el servidor: " + err.message }, { status: 500 });
   }
 }
