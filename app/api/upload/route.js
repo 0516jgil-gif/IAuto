@@ -8,20 +8,19 @@ export async function POST(request) {
     const jsonResponse = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async (pathname) => {
-        // Aquí puedes añadir autenticación si quieres
+      onBeforeGenerateToken: async () => {
         return {
           allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-          maximumSizeInBytes: 5 * 1024 * 1024, // 5MB
         };
       },
       onUploadCompleted: async ({ blob }) => {
-        console.log("Imagen subida:", blob.url);
+        console.log("Subida completada:", blob.url);
       },
     });
 
     return NextResponse.json(jsonResponse);
   } catch (error) {
+    console.error("Upload error:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
