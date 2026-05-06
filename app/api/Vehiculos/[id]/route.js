@@ -2,9 +2,10 @@ export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await context.params;
+    const id = Number(rawId);
 
     if (!id || isNaN(id)) {
       return NextResponse.json({ error: "ID no válido" }, { status: 400 });
@@ -12,9 +13,6 @@ export async function GET(req, { params }) {
 
     const vehiculo = await prisma.vehiculo.findUnique({
       where: { id },
-      include: {
-        ventas: true,
-      },
     });
 
     if (!vehiculo) {
