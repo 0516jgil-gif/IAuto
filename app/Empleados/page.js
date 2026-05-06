@@ -811,14 +811,15 @@ export default function PanelAdmin() {
                             if (!file) return;
                             setUploadingImg(true);
                             try {
-                              const fd = new FormData();
-                              fd.append("file", file);
-                              const res = await fetch("/api/upload", { method: "POST", body: fd });
-                              const data = await res.json();
-                              if (!res.ok) { alert(data.error || "Error al subir imagen"); return; }
+                              const { upload } = await import("@vercel/blob/client");
+                              const blob = await upload(
+                                `vehiculos/${Date.now()}-${file.name.replace(/\s+/g, "-")}`,
+                                file,
+                                { access: "public", handleUploadUrl: "/api/upload" }
+                              );
                               setEditForm(prev => ({
                                 ...prev,
-                                imagenes: [...(prev.imagenes || []), data.url],
+                                imagenes: [...(prev.imagenes || []), blob.url],
                               }));
                             } catch {
                               alert("Error al subir imagen");
