@@ -123,12 +123,24 @@ export default function ListaVehiculos() {
               onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "#3b82f6"; }}
               onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "#1a1a1a"; }}
             >
+              {/* ── Imagen principal del vehículo ── */}
               <div style={{
                 height: "170px", backgroundColor: "#111",
                 display: "flex", justifyContent: "center", alignItems: "center",
-                fontSize: "4rem",
+                overflow: "hidden",
                 backgroundImage: "radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0d0d0d 100%)"
-              }}>🚗</div>
+              }}>
+                {v.imagenes && v.imagenes.length > 0 ? (
+                  <img
+                    src={v.imagenes[0]}
+                    alt={`${v.marca} ${v.modelo}`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <span style={{ fontSize: "4rem" }}>🚗</span>
+                )}
+              </div>
+
               <div style={{ padding: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
                   <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{v.marca} {v.modelo}</h3>

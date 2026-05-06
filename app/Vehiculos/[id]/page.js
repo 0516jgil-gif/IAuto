@@ -12,9 +12,9 @@ export default function VehiculoDetalle() {
   const [isLogged, setIsLogged] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("");
+  const [imagenActiva, setImagenActiva] = useState(0); // índice de la imagen seleccionada
 
   useEffect(() => {
-    // Auth check
     const userId = localStorage.getItem("userId");
     const lastActivity = localStorage.getItem("lastActivity");
     const rol = localStorage.getItem("userRol");
@@ -37,7 +37,6 @@ export default function VehiculoDetalle() {
       }
     }
 
-    // Fetch vehicle
     fetch(`/api/Vehiculos/${id}`)
       .then((r) => {
         if (r.status === 404) { setNotFound(true); return null; }
@@ -59,7 +58,6 @@ export default function VehiculoDetalle() {
     }
   };
 
-  // ── Estilos comunes ──
   const card = {
     backgroundColor: "#0d0d0d",
     border: "1px solid #1a1a1a",
@@ -71,7 +69,7 @@ export default function VehiculoDetalle() {
     return (
       <div style={{ backgroundColor: "#000", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: "sans-serif" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "2rem", marginBottom: "1rem", animation: "pulse 1.5s infinite" }}>🚗</div>
+          <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>🚗</div>
           <p style={{ color: "#555" }}>Cargando vehículo...</p>
         </div>
       </div>
@@ -94,8 +92,10 @@ export default function VehiculoDetalle() {
   }
 
   const disponible = vehiculo.stock > 0;
+  const imagenes = Array.isArray(vehiculo.imagenes) && vehiculo.imagenes.length > 0
+    ? vehiculo.imagenes
+    : null;
 
-  // ── Campos a mostrar según los datos que tenga el vehículo ──
   const specs = [
     { label: "Marca",        value: vehiculo.marca },
     { label: "Modelo",       value: vehiculo.modelo },
@@ -167,17 +167,61 @@ export default function VehiculoDetalle() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2.5rem" }}>
 
-          {/* ── Columna izquierda: imagen ── */}
+          {/* ── Columna izquierda: galería de imágenes ── */}
           <div>
+            {/* Imagen principal */}
             <div style={{
               height: "360px", borderRadius: "20px",
               border: "1px solid #1a1a1a", backgroundColor: "#111",
-              backgroundImage: "radial-gradient(circle at 50% 45%, #1e3a8a 0%, #111827 36%, #050505 100%)",
+              overflow: "hidden", marginBottom: "0.75rem",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "6rem", marginBottom: "1rem",
+              backgroundImage: !imagenes
+                ? "radial-gradient(circle at 50% 45%, #1e3a8a 0%, #111827 36%, #050505 100%)"
+                : "none",
             }}>
-              🚗
+              {imagenes ? (
+                <img
+                  src={imagenes[imagenActiva]}
+                  alt={`${vehiculo.marca} ${vehiculo.modelo} - foto ${imagenActiva + 1}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <span style={{ fontSize: "6rem" }}>🚗</span>
+              )}
             </div>
+
+            {/* Miniaturas — solo si hay más de 1 imagen */}
+            {imagenes && imagenes.length > 1 && (
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                {imagenes.map((url, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setImagenActiva(i)}
+                    style={{
+                      width: "72px", height: "52px", borderRadius: "8px",
+                      overflow: "hidden", cursor: "pointer", flexShrink: 0,
+                      border: i === imagenActiva
+                        ? "2px solid #3b82f6"
+                        : "2px solid #1a1a1a",
+                      transition: "border-color 0.15s",
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt={`miniatura ${i + 1}`}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Contador de fotos */}
+            {imagenes && imagenes.length > 1 && (
+              <p style={{ color: "#555", fontSize: "0.78rem", margin: "0 0 1rem" }}>
+                Foto {imagenActiva + 1} de {imagenes.length}
+              </p>
+            )}
 
             {/* Badge disponibilidad */}
             <div style={{

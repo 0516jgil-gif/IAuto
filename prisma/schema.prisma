@@ -27,12 +27,13 @@ model Empleado {
 }
 
 model Vehiculo {
-  id     Int     @id @default(autoincrement())
-  marca  String
-  modelo String
-  precio Float
-  stock  Int
-  ventas Venta[]
+  id       Int      @id @default(autoincrement())
+  marca    String
+  modelo   String
+  precio   Float
+  stock    Int
+  imagenes String[] // URLs de imágenes en Vercel Blob
+  ventas   Venta[]
 }
 
 model Venta {

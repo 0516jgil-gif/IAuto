@@ -9,6 +9,7 @@ export default function PanelAdmin() {
   const [editingItem, setEditingItem] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [editSaving, setEditSaving] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleteSaving, setDeleteSaving] = useState(false);
   const [clienteSearch, setClienteSearch] = useState("");
@@ -83,6 +84,7 @@ export default function PanelAdmin() {
       modelo: vehiculo.modelo || "",
       precio: String(vehiculo.precio ?? ""),
       stock: String(vehiculo.stock ?? ""),
+      imagenes: Array.isArray(vehiculo.imagenes) ? vehiculo.imagenes : [],
     });
   };
 
@@ -93,6 +95,7 @@ export default function PanelAdmin() {
       modelo: "",
       precio: "",
       stock: "",
+      imagenes: [],
     });
   };
 
@@ -100,6 +103,7 @@ export default function PanelAdmin() {
     setEditingItem(null);
     setEditForm({});
     setEditSaving(false);
+    setUploadingImg(false);
   };
 
   const handleGuardarEdicion = async (e) => {
@@ -125,6 +129,7 @@ export default function PanelAdmin() {
           modelo: editForm.modelo.trim(),
           precio: Number(editForm.precio),
           stock: Number(editForm.stock),
+          imagenes: Array.isArray(editForm.imagenes) ? editForm.imagenes : [],
         };
 
     if (isCliente && (!payload.nombre || !payload.email || !payload.telefono)) {
@@ -746,6 +751,87 @@ export default function PanelAdmin() {
                       style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
                     />
                   </label>
+
+                  {/* ── Sección de imágenes ── */}
+                  <div style={{ display: "grid", gap: "0.5rem" }}>
+                    <span style={{ color: "#aaa", fontSize: "0.85rem" }}>
+                      Imágenes ({(editForm.imagenes || []).length}/5)
+                    </span>
+
+                    {/* Miniaturas de imágenes actuales */}
+                    {(editForm.imagenes || []).length > 0 && (
+                      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        {(editForm.imagenes || []).map((url, i) => (
+                          <div key={i} style={{ position: "relative", width: "64px", height: "48px" }}>
+                            <img
+                              src={url}
+                              alt={`img ${i + 1}`}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #333" }}
+                            />
+                            {/* Botón eliminar imagen */}
+                            <button
+                              type="button"
+                              onClick={() => setEditForm(prev => ({
+                                ...prev,
+                                imagenes: prev.imagenes.filter((_, idx) => idx !== i)
+                              }))}
+                              style={{
+                                position: "absolute", top: "-6px", right: "-6px",
+                                width: "18px", height: "18px", borderRadius: "50%",
+                                backgroundColor: "#ef4444", border: "none",
+                                color: "#fff", cursor: "pointer",
+                                fontSize: "0.65rem", fontWeight: "800",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                lineHeight: 1, padding: 0,
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Botón subir nueva imagen */}
+                    {(editForm.imagenes || []).length < 5 && (
+                      <label style={{
+                        display: "flex", alignItems: "center", gap: "0.5rem",
+                        backgroundColor: "#050505", border: "1px dashed #333",
+                        borderRadius: "8px", padding: "0.75rem",
+                        cursor: uploadingImg ? "not-allowed" : "pointer",
+                        color: "#555", fontSize: "0.85rem",
+                      }}>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          style={{ display: "none" }}
+                          disabled={uploadingImg}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setUploadingImg(true);
+                            try {
+                              const fd = new FormData();
+                              fd.append("file", file);
+                              const res = await fetch("/api/upload", { method: "POST", body: fd });
+                              const data = await res.json();
+                              if (!res.ok) { alert(data.error || "Error al subir imagen"); return; }
+                              setEditForm(prev => ({
+                                ...prev,
+                                imagenes: [...(prev.imagenes || []), data.url],
+                              }));
+                            } catch {
+                              alert("Error al subir imagen");
+                            } finally {
+                              setUploadingImg(false);
+                              e.target.value = "";
+                            }
+                          }}
+                        />
+                        {uploadingImg ? "⏳ Subiendo..." : "📷 Subir imagen"}
+                      </label>
+                    )}
+                  </div>
                 </>
               )}
             </div>
