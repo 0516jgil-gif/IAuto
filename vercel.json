@@ -1,0 +1,15 @@
+{
+  "functions": {
+    "app/api/upload/route.js": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/upload",
+      "headers": [
+        { "key": "x-vercel-protection-bypass", "value": "1" }
+      ]
+    }
+  ]
+}

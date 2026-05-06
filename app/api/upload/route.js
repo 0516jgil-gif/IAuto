@@ -1,32 +1,25 @@
-import { handleUpload } from "@vercel/blob/client";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
-export async function POST(request) {
-  // Comprobamos que el token existe
-  console.log("TOKEN existe:", !!process.env.BLOB_READ_WRITE_TOKEN);
-  console.log("TOKEN valor:", process.env.BLOB_READ_WRITE_TOKEN?.slice(0, 20) + "...");
+export const runtime = "nodejs";
 
-  const body = await request.json();
-  console.log("Body recibido:", JSON.stringify(body).slice(0, 100));
-
+export async function POST(req) {
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async () => {
-        return {
-          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-        };
-      },
-      onUploadCompleted: async ({ blob }) => {
-        console.log("Subida completada:", blob.url);
-      },
+    const formData = await req.formData();
+    const file = formData.get("file");
+
+    if (!file) {
+      return NextResponse.json({ error: "No se recibió ningún archivo" }, { status: 400 });
+    }
+
+    const blob = await put(`vehiculos/${Date.now()}-${file.name.replace(/\s+/g, "-")}`, file, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
-    console.log("Respuesta handleUpload:", JSON.stringify(jsonResponse).slice(0, 100));
-    return NextResponse.json(jsonResponse);
-  } catch (error) {
-    console.error("Upload error completo:", error);
-    return NextResponse.json({ error: error.message, stack: error.stack }, { status: 400 });
+    return NextResponse.json({ url: blob.url });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
