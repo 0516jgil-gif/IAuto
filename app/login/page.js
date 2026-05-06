@@ -226,7 +226,7 @@ export default function AuthPage() {
           textAlign: "center", marginTop: "0.8rem",
           cursor: "pointer", color: "#333", fontSize: "0.85rem"
         }}>
-          ← Volver al inicio
+          ← volver al inicio
         </p>
       </div>
     </div>
