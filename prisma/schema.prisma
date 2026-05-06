@@ -8,19 +8,22 @@ generator client {
 }
 
 model Cliente {
-  id       Int     @id @default(autoincrement())
-  nombre   String
-  email    String  @unique
-  telefono String
-  ventas   Venta[]
+  id               Int     @id @default(autoincrement())
+  nombre           String
+  email            String  @unique
+  password         String
+  verificationCode String?
+  ventas           Venta[]
 }
 
 model Empleado {
-  id     Int     @id @default(autoincrement())
-  nombre String
-  email  String  @unique
-  rol    String  @default("empleado")
-  ventas Venta[]
+  id               Int     @id @default(autoincrement())
+  nombre           String
+  email            String  @unique
+  rol              String  @default("empleado")
+  password         String?
+  verificationCode String?
+  ventas           Venta[]
 }
 
 model Vehiculo {

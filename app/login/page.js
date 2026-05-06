@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [formData, setFormData] = useState({ nombre: "", email: "", telefono: "" });
+  const [step, setStep] = useState(1); // 1 = formulario, 2 = código verificación
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [formData, setFormData] = useState({ nombre: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -16,10 +19,10 @@ export default function AuthPage() {
     let endpoint, body;
     if (isAdmin) {
       endpoint = "/api/admin-login";
-      body = { email: formData.email };
+      body = { email: formData.email, password: formData.password };
     } else if (isLogin) {
       endpoint = "/api/login";
-      body = { email: formData.email };
+      body = { email: formData.email, password: formData.password };
     } else {
       endpoint = "/api/Clientes";
       body = formData;
@@ -29,6 +32,30 @@ export default function AuthPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.pendingVerification) {
+        setPendingEmail(data.email);
+        setStep(2);
+      }
+    } else {
+      const err = await res.json();
+      alert(err.error || "Error al procesar la solicitud");
+    }
+    setLoading(false);
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const tipo = isAdmin ? "admin" : "cliente";
+    const res = await fetch("/api/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: pendingEmail, code: verificationCode, tipo }),
     });
 
     if (res.ok) {
@@ -45,7 +72,7 @@ export default function AuthPage() {
       }
     } else {
       const err = await res.json();
-      alert(err.error || "Error al iniciar sesión");
+      alert(err.error || "Código incorrecto");
     }
     setLoading(false);
   };
@@ -57,6 +84,8 @@ export default function AuthPage() {
     boxSizing: "border-box", fontSize: "0.95rem",
     outline: "none", transition: "border-color 0.2s",
   };
+
+  const accentColor = isAdmin ? "#7c3aed" : "#3b82f6";
 
   return (
     <div style={{
@@ -78,75 +107,119 @@ export default function AuthPage() {
           </a>
         </div>
 
-        {/* Tabs: Cliente / Admin */}
-        <div style={{ display: "flex", marginBottom: "2rem", borderRadius: "12px", overflow: "hidden", border: "1px solid #222" }}>
-          <button onClick={() => setIsAdmin(false)} style={{
-            flex: 1, padding: "10px", border: "none", cursor: "pointer",
-            backgroundColor: !isAdmin ? "#3b82f6" : "#111",
-            color: !isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
-          }}>
-            Cliente
-          </button>
-          <button onClick={() => setIsAdmin(true)} style={{
-            flex: 1, padding: "10px", border: "none", cursor: "pointer",
-            backgroundColor: isAdmin ? "#7c3aed" : "#111",
-            color: isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
-          }}>
-            🔒 Admin
-          </button>
-        </div>
+        {step === 1 && (
+          <>
+            {/* Tabs: Cliente / Admin */}
+            <div style={{ display: "flex", marginBottom: "2rem", borderRadius: "12px", overflow: "hidden", border: "1px solid #222" }}>
+              <button onClick={() => setIsAdmin(false)} style={{
+                flex: 1, padding: "10px", border: "none", cursor: "pointer",
+                backgroundColor: !isAdmin ? "#3b82f6" : "#111",
+                color: !isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
+              }}>
+                Cliente
+              </button>
+              <button onClick={() => setIsAdmin(true)} style={{
+                flex: 1, padding: "10px", border: "none", cursor: "pointer",
+                backgroundColor: isAdmin ? "#7c3aed" : "#111",
+                color: isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
+              }}>
+                🔒 Admin
+              </button>
+            </div>
 
-        <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: "1.5rem", fontSize: "1.1rem", color: "#aaa" }}>
-          {isAdmin ? "Acceso de Administrador" : (isLogin ? "Bienvenido de vuelta" : "Crear cuenta")}
-        </h2>
+            <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: "1.5rem", fontSize: "1.1rem", color: "#aaa" }}>
+              {isAdmin ? "Acceso de Administrador" : (isLogin ? "Bienvenido de vuelta" : "Crear cuenta")}
+            </h2>
 
-        <form onSubmit={handleSubmit}>
-          {!isLogin && !isAdmin && (
-            <input
-              placeholder="Nombre completo"
-              required
-              style={inputStyle}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            />
-          )}
-          <input
-            type="email"
-            placeholder={isAdmin ? "Email de empleado" : "Email"}
-            required
-            style={inputStyle}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-          {!isLogin && !isAdmin && (
-            <input
-              placeholder="Teléfono"
-              required
-              style={inputStyle}
-              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-            />
-          )}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%", padding: "13px",
-              backgroundColor: isAdmin ? "#7c3aed" : "#3b82f6",
-              color: "#fff", border: "none", borderRadius: "10px",
-              cursor: "pointer", fontWeight: "700", fontSize: "1rem",
-              opacity: loading ? 0.7 : 1, transition: "opacity 0.2s"
-            }}
-          >
-            {loading ? "Cargando..." : (isAdmin ? "Acceder como Admin" : (isLogin ? "Entrar" : "Crear Cuenta"))}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit}>
+              {!isLogin && !isAdmin && (
+                <input
+                  placeholder="Nombre completo"
+                  required
+                  style={inputStyle}
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                />
+              )}
+              <input
+                type="email"
+                placeholder={isAdmin ? "Email de empleado" : "Email"}
+                required
+                style={inputStyle}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+              <input
+                type="password"
+                placeholder="Contraseña"
+                required
+                style={inputStyle}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: "100%", padding: "13px",
+                  backgroundColor: accentColor,
+                  color: "#fff", border: "none", borderRadius: "10px",
+                  cursor: "pointer", fontWeight: "700", fontSize: "1rem",
+                  opacity: loading ? 0.7 : 1, transition: "opacity 0.2s"
+                }}
+              >
+                {loading ? "Cargando..." : (isAdmin ? "Acceder como Admin" : (isLogin ? "Entrar" : "Crear Cuenta"))}
+              </button>
+            </form>
 
-        {!isAdmin && (
-          <p onClick={() => setIsLogin(!isLogin)} style={{
-            textAlign: "center", marginTop: "1.2rem",
-            cursor: "pointer", color: "#555", fontSize: "0.9rem"
-          }}>
-            {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
-            <span style={{ color: "#3b82f6" }}>{isLogin ? "Regístrate" : "Inicia sesión"}</span>
-          </p>
+            {!isAdmin && (
+              <p onClick={() => setIsLogin(!isLogin)} style={{
+                textAlign: "center", marginTop: "1.2rem",
+                cursor: "pointer", color: "#555", fontSize: "0.9rem"
+              }}>
+                {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+                <span style={{ color: "#3b82f6" }}>{isLogin ? "Regístrate" : "Inicia sesión"}</span>
+              </p>
+            )}
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: "0.5rem", fontSize: "1.1rem", color: "#aaa" }}>
+              Verificación en dos pasos
+            </h2>
+            <p style={{ textAlign: "center", color: "#555", fontSize: "0.88rem", marginBottom: "1.5rem" }}>
+              Hemos enviado un código de 6 dígitos a<br />
+              <strong style={{ color: "#fff" }}>{pendingEmail}</strong>
+            </p>
+            <form onSubmit={handleVerify}>
+              <input
+                type="text"
+                placeholder="Introduce el código"
+                required
+                maxLength={6}
+                style={{ ...inputStyle, textAlign: "center", fontSize: "1.8rem", letterSpacing: "10px", fontWeight: "700" }}
+                onChange={(e) => setVerificationCode(e.target.value)}
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: "100%", padding: "13px",
+                  backgroundColor: accentColor,
+                  color: "#fff", border: "none", borderRadius: "10px",
+                  cursor: "pointer", fontWeight: "700", fontSize: "1rem",
+                  opacity: loading ? 0.7 : 1, transition: "opacity 0.2s"
+                }}
+              >
+                {loading ? "Verificando..." : "Confirmar código"}
+              </button>
+            </form>
+            <p onClick={() => setStep(1)} style={{
+              textAlign: "center", marginTop: "1rem",
+              cursor: "pointer", color: "#333", fontSize: "0.85rem"
+            }}>
+              ← Volver atrás
+            </p>
+          </>
         )}
 
         <p onClick={() => router.push("/")} style={{
