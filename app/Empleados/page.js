@@ -442,21 +442,35 @@ export default function PanelAdmin() {
           Gestión completa de la plataforma IAuto
         </p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
           {statCards.map(({ label, value, icon, color }) => (
             <div key={label} style={{
               backgroundColor: "#111",
               borderRadius: "16px",
-              padding: "1.5rem",
+              padding: "1.35rem",
               border: "1px solid #1f1f1f",
               position: "relative",
               overflow: "hidden",
+              minHeight: "142px",
             }}>
-              <div style={{ position: "absolute", top: "-10px", right: "-10px", fontSize: "4rem", opacity: 0.06 }}>
+              <div style={{ position: "absolute", top: "-12px", right: "-8px", fontSize: "4.6rem", opacity: 0.14, color, fontWeight: "900", lineHeight: 1 }}>
                 {icon}
               </div>
 
-              <div style={{ fontSize: "1.8rem", marginBottom: "0.3rem" }}>{icon}</div>
+              <div style={{
+                width: "34px",
+                height: "34px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color,
+                border: `1px solid ${color}`,
+                backgroundColor: `${color}1a`,
+                fontSize: "1.1rem",
+                fontWeight: "900",
+                marginBottom: "0.85rem",
+              }}>{icon}</div>
 
               <p style={{ color: "#666", fontSize: "0.8rem", marginBottom: "0.3rem", textTransform: "uppercase", letterSpacing: "1px" }}>
                 {label}
