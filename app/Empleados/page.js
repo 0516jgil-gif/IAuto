@@ -14,6 +14,7 @@ export default function PanelAdmin() {
   const [deleteSaving, setDeleteSaving] = useState(false);
   const [clienteSearch, setClienteSearch] = useState("");
   const [vehiculoSearch, setVehiculoSearch] = useState("");
+  const [ventaInfo, setVentaInfo] = useState(null);
 
   useEffect(() => {
     const rol = localStorage.getItem("userRol");
@@ -46,6 +47,7 @@ export default function PanelAdmin() {
       ok: { background: "#064e3b", color: "#10b981" },
       edit: { background: "#172554", color: "#60a5fa" },
       add: { background: "#064e3b", color: "#34d399" },
+      info: { background: "#172554", color: "#60a5fa" },
       no: { background: "#450a0a", color: "#ef4444" },
     };
     const selected = colors[type] || colors.no;
@@ -265,6 +267,15 @@ export default function PanelAdmin() {
       alert("La venta se ha procesado correctamente.");
     }
   };
+
+  const nombreVehiculoVenta = (venta) => `${venta.vehiculo?.marca || ""} ${venta.vehiculo?.modelo || ""}`.trim() || "Vehículo";
+
+  const detalleVentaLinea = (label, value) => (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.7rem 0", borderTop: "1px solid #1a1a1a" }}>
+      <span style={{ color: "#777" }}>{label}</span>
+      <strong style={{ color: "#fff", textAlign: "right" }}>{value || "-"}</strong>
+    </div>
+  );
 
 
   if (loading) return (
@@ -626,6 +637,14 @@ export default function PanelAdmin() {
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
                           <button
+                            onClick={() => setVentaInfo(v)}
+                            title="Información de venta"
+                            style={buttonActionStyle("info")}
+                          >
+                            i
+                          </button>
+
+                          <button
                             onClick={() => handleProcesarVenta(v)}
                             title="Procesar venta"
                             style={buttonActionStyle("ok")}
@@ -916,6 +935,57 @@ export default function PanelAdmin() {
                 style={{ backgroundColor: "#991b1b", border: "1px solid #ef4444", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
               >
                 {deleteSaving ? "Borrando..." : "Aceptar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {ventaInfo && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.72)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "1rem",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            width: "100%",
+            maxWidth: "500px",
+            backgroundColor: "#0d0d0d",
+            border: "1px solid #2563eb",
+            borderRadius: "16px",
+            padding: "1.5rem",
+            boxShadow: "0 24px 70px rgba(0, 0, 0, 0.55)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", marginBottom: "1rem" }}>
+              <div>
+                <p style={{ color: "#60a5fa", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>
+                  Información de venta
+                </p>
+                <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Venta #{ventaInfo.id}</h2>
+              </div>
+              <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #333", color: "#aaa", borderRadius: "8px", width: "34px", height: "34px", cursor: "pointer" }}>x</button>
+            </div>
+
+            {detalleVentaLinea("Cliente", ventaInfo.cliente?.nombre)}
+            {detalleVentaLinea("Email cliente", ventaInfo.cliente?.email)}
+            {detalleVentaLinea("Empleado", ventaInfo.empleado?.nombre)}
+            {detalleVentaLinea("Vehículo", nombreVehiculoVenta(ventaInfo))}
+            {detalleVentaLinea("Cantidad", `${ventaInfo.cantidad} unidad(es)`)}
+            {detalleVentaLinea("Total", `${ventaInfo.total?.toLocaleString()} €`)}
+            {detalleVentaLinea("Fecha", ventaInfo.fecha ? new Date(ventaInfo.fecha).toLocaleDateString("es-ES") : "-")}
+            {detalleVentaLinea("Estado", "Registrada")}
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.2rem" }}>
+              <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
+                Cerrar
+              </button>
+              <button onClick={() => { setVentaInfo(null); handleProcesarVenta(ventaInfo); }} style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", color: "#10b981", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "800" }}>
+                Procesar
               </button>
             </div>
           </div>

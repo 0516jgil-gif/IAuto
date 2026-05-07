@@ -5,6 +5,7 @@ export default function Perfil() {
   const [cliente, setCliente] = useState(null);
   const [favoritos, setFavoritos] = useState([]);
   const [ventas, setVentas] = useState([]);
+  const [ventaInfo, setVentaInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,6 +64,12 @@ export default function Perfil() {
   };
 
   const nombreVehiculo = (vehiculo) => `${vehiculo?.marca || ""} ${vehiculo?.modelo || ""}`.trim() || "Vehiculo";
+  const detalleLinea = (label, value) => (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.7rem 0", borderTop: "1px solid #1a1a1a" }}>
+      <span style={{ color: "#777" }}>{label}</span>
+      <strong style={{ color: "#fff", textAlign: "right" }}>{value || "-"}</strong>
+    </div>
+  );
 
   if (loading) return (
     <div style={{ backgroundColor: "#000", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", color: "#fff" }}>
@@ -159,17 +166,47 @@ export default function Perfil() {
                     {new Date(venta.fecha).toLocaleDateString()} · {venta.cantidad} unidad(es)
                   </p>
                 </div>
-                <div style={{ textAlign: "right" }}>
+                <div style={{ textAlign: "right", display: "grid", justifyItems: "end", gap: "0.5rem" }}>
                   <p style={{ margin: "0 0 0.5rem", color: "#10b981", fontWeight: "800" }}>{venta.total?.toLocaleString()} EUR</p>
-                  <button onClick={() => window.location.href = `/Vehiculos/${venta.vehiculoId}`} style={{ padding: "7px 12px", backgroundColor: "#1a1a1a", color: "#fff", border: "1px solid #222", borderRadius: "8px", cursor: "pointer" }}>
-                    Ver coche
-                  </button>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button onClick={() => setVentaInfo(venta)} style={{ padding: "7px 12px", backgroundColor: "#172554", color: "#60a5fa", border: "1px solid #60a5fa", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
+                      Info
+                    </button>
+                    <button onClick={() => window.location.href = `/Vehiculos/${venta.vehiculoId}`} style={{ padding: "7px 12px", backgroundColor: "#1a1a1a", color: "#fff", border: "1px solid #222", borderRadius: "8px", cursor: "pointer" }}>
+                      Ver coche
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
           )}
         </section>
       </main>
+
+      {ventaInfo && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
+          <div style={{ width: "100%", maxWidth: "480px", backgroundColor: "#0d0d0d", border: "1px solid #222", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", marginBottom: "1rem" }}>
+              <div>
+                <p style={{ color: "#3b82f6", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>Información de compra</p>
+                <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Pedido #{ventaInfo.id}</h2>
+              </div>
+              <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #333", color: "#aaa", borderRadius: "8px", width: "34px", height: "34px", cursor: "pointer" }}>x</button>
+            </div>
+
+            {detalleLinea("Vehículo", nombreVehiculo(ventaInfo.vehiculo))}
+            {detalleLinea("Fecha", ventaInfo.fecha ? new Date(ventaInfo.fecha).toLocaleDateString("es-ES") : "-")}
+            {detalleLinea("Cantidad", `${ventaInfo.cantidad} unidad(es)`)}
+            {detalleLinea("Total", `${ventaInfo.total?.toLocaleString()} EUR`)}
+            {detalleLinea("Empleado asignado", ventaInfo.empleado?.nombre)}
+            {detalleLinea("Estado", "Compra registrada")}
+
+            <button onClick={() => setVentaInfo(null)} style={{ width: "100%", marginTop: "1.2rem", padding: "0.75rem 1rem", backgroundColor: "#2563eb", border: "1px solid #60a5fa", color: "#fff", borderRadius: "10px", cursor: "pointer", fontWeight: "800" }}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
