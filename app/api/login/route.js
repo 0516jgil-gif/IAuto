@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/lib/email";
+import { isTrustedVerification } from "@/lib/trustedVerification";
 
 export async function POST(req) {
   try {
@@ -19,6 +20,10 @@ export async function POST(req) {
     const passwordOk = await bcrypt.compare(password, cliente.password);
     if (!passwordOk) {
       return NextResponse.json({ error: "Contraseña incorrecta" }, { status: 401 });
+    }
+
+    if (isTrustedVerification(req, cliente.email, "cliente")) {
+      return NextResponse.json(cliente);
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();

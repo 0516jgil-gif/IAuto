@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { setTrustedVerificationCookie } from "@/lib/trustedVerification";
 
 export async function POST(req) {
   try {
@@ -13,7 +14,9 @@ export async function POST(req) {
       }
 
       await prisma.empleado.update({ where: { email }, data: { verificationCode: null } });
-      return NextResponse.json({ id: empleado.id, nombre: empleado.nombre, rol: empleado.rol });
+      const res = NextResponse.json({ id: empleado.id, nombre: empleado.nombre, rol: empleado.rol });
+      setTrustedVerificationCookie(res, empleado.email, "admin");
+      return res;
     } else {
       const cliente = await prisma.cliente.findUnique({
         where: { email },
@@ -25,7 +28,9 @@ export async function POST(req) {
       }
 
       await prisma.cliente.update({ where: { email }, data: { verificationCode: null } });
-      return NextResponse.json(cliente);
+      const res = NextResponse.json(cliente);
+      setTrustedVerificationCookie(res, cliente.email, "cliente");
+      return res;
     }
   } catch (err) {
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });

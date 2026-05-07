@@ -45,6 +45,17 @@ export default function AuthPage() {
       if (data.pendingVerification) {
         setPendingEmail(data.email);
         setStep(2);
+      } else {
+        localStorage.setItem("userId", data.id);
+        localStorage.setItem("lastActivity", new Date().getTime().toString());
+        if (isAdmin) {
+          localStorage.setItem("userRol", "admin");
+          localStorage.setItem("userName", data.nombre);
+          router.push("/Empleados");
+        } else {
+          localStorage.setItem("userRol", "cliente");
+          router.push("/Vehiculos");
+        }
       }
     } else {
       const err = await res.json();
@@ -173,9 +184,9 @@ export default function AuthPage() {
         boxShadow: "0 25px 50px rgba(0,0,0,0.6)"
       }}>
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <a href="/" style={{ fontSize: "1.8rem", fontWeight: "800", color: "#3b82f6", textDecoration: "none", letterSpacing: "2px" }}>
+          <span onClick={() => router.push("/")} style={{ fontSize: "1.8rem", fontWeight: "800", color: "#3b82f6", letterSpacing: "2px", cursor: "pointer" }}>
             IAUTO
-          </a>
+          </span>
         </div>
 
         {/* ── LOGIN NORMAL ── */}
