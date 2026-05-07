@@ -2,40 +2,61 @@ export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const clienteId = Number(searchParams.get("clienteId"));
+
   const ventas = await prisma.venta.findMany({
-    include: { cliente: true, empleado: true, vehiculo: true }
+    where: clienteId ? { clienteId } : undefined,
+    include: { cliente: true, empleado: true, vehiculo: true },
+    orderBy: { fecha: "desc" },
   });
   return NextResponse.json(ventas);
 }
 
 export async function POST(req) {
   const body = await req.json();
+  const clienteId = Number(body.clienteId);
+  const vehiculoId = Number(body.vehiculoId);
+  const cantidad = Number(body.cantidad || 1);
+  let empleadoId = Number(body.empleadoId);
+
+  if (!clienteId || !vehiculoId || !cantidad) {
+    return NextResponse.json({ error: "Faltan datos para registrar la compra" }, { status: 400 });
+  }
+
+  if (!empleadoId) {
+    const empleado = await prisma.empleado.findFirst({ orderBy: { id: "asc" } });
+    if (!empleado) {
+      return NextResponse.json({ error: "No hay empleados disponibles para asignar la venta" }, { status: 400 });
+    }
+    empleadoId = empleado.id;
+  }
 
   // Calcular total y actualizar stock
-  const vehiculo = await prisma.vehiculo.findUnique({ where: { id: body.vehiculoId } });
-  if (!vehiculo || vehiculo.stock < body.cantidad) {
+  const vehiculo = await prisma.vehiculo.findUnique({ where: { id: vehiculoId } });
+  if (!vehiculo || vehiculo.stock < cantidad) {
     return NextResponse.json({ error: "Stock insuficiente" }, { status: 400 });
   }
 
-  const total = vehiculo.precio * body.cantidad;
+  const total = vehiculo.precio * cantidad;
 
-  // Crear venta
-  const venta = await prisma.venta.create({
-    data: {
-      clienteId: body.clienteId,
-      empleadoId: body.empleadoId,
-      vehiculoId: body.vehiculoId,
-      cantidad: body.cantidad,
-      total
-    }
-  });
-
-  // Actualizar stock
-  await prisma.vehiculo.update({
-    where: { id: body.vehiculoId },
-    data: { stock: vehiculo.stock - body.cantidad }
-  });
+  const [venta] = await prisma.$transaction([
+    prisma.venta.create({
+      data: {
+        clienteId,
+        empleadoId,
+        vehiculoId,
+        cantidad,
+        total,
+      },
+      include: { cliente: true, empleado: true, vehiculo: true },
+    }),
+    prisma.vehiculo.update({
+      where: { id: vehiculoId },
+      data: { stock: { decrement: cantidad } },
+    }),
+  ]);
 
   return NextResponse.json(venta);
 }

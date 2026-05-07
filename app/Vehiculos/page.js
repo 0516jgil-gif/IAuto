@@ -19,17 +19,19 @@ export default function ListaVehiculos() {
     const ahora = new Date().getTime();
 
     if (userId && lastActivity && (ahora - parseInt(lastActivity) < 30 * 60 * 1000)) {
-      setIsLogged(true);
       localStorage.setItem("lastActivity", ahora.toString());
-      if (rol === "admin") {
-        setIsAdmin(true);
-        setUserName(adminName || "Admin");
-      } else {
-        fetch("/api/Clientes").then(r => r.json()).then(data => {
-          const user = data.find(c => c.id === parseInt(userId));
-          if (user) setUserName(user.nombre);
-        });
-      }
+      Promise.resolve().then(() => {
+        setIsLogged(true);
+        if (rol === "admin") {
+          setIsAdmin(true);
+          setUserName(adminName || "Admin");
+        } else {
+          fetch("/api/Clientes").then(r => r.json()).then(data => {
+            const user = data.find(c => c.id === parseInt(userId));
+            if (user) setUserName(user.nombre);
+          });
+        }
+      });
     } else {
       if (userId) localStorage.clear();
     }
@@ -37,13 +39,54 @@ export default function ListaVehiculos() {
     fetch("/api/Vehiculos").then(r => r.json()).then(setVehiculos);
   }, []);
 
-  const handleAccion = (accion) => {
-    if (!isLogged) {
-      alert(`Para ${accion} debes iniciar sesión.`);
+  const validarCliente = (accion) => {
+    if (!isLogged || localStorage.getItem("userRol") === "admin") {
+      alert(`Para ${accion} debes iniciar sesión como cliente.`);
       router.push("/login");
-    } else {
-      alert(`✅ ${accion.charAt(0).toUpperCase() + accion.slice(1)} registrado correctamente.`);
+      return null;
     }
+    return Number(localStorage.getItem("userId"));
+  };
+
+  const handleComprar = async (vehiculoId) => {
+    const clienteId = validarCliente("comprar este vehículo");
+    if (!clienteId) return;
+
+    const res = await fetch("/api/ventas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clienteId, vehiculoId, cantidad: 1 }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "No se pudo registrar la compra.");
+      return;
+    }
+
+    setVehiculos((actuales) =>
+      actuales.map((v) => v.id === vehiculoId ? { ...v, stock: Math.max(v.stock - 1, 0) } : v)
+    );
+    alert("Compra registrada correctamente. Ya aparece en tu perfil.");
+  };
+
+  const handleFavorito = async (vehiculoId) => {
+    const clienteId = validarCliente("guardar en favoritos");
+    if (!clienteId) return;
+
+    const res = await fetch("/api/favoritos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clienteId, vehiculoId }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "No se pudo guardar el favorito.");
+      return;
+    }
+
+    alert("Vehículo guardado en favoritos. Ya aparece en tu perfil.");
   };
 
   const filtrados = vehiculos.filter(v =>
@@ -157,7 +200,7 @@ export default function ListaVehiculos() {
                 </p>
                 <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", gap: "8px" }}>
                   <button
-                    onClick={() => handleAccion("comprar este vehículo")}
+                    onClick={() => handleComprar(v.id)}
                     disabled={v.stock === 0}
                     style={{
                       flex: 2, padding: "10px", backgroundColor: v.stock > 0 ? "#fff" : "#222",
@@ -174,7 +217,7 @@ export default function ListaVehiculos() {
                     Ver más
                   </button>
                   <button
-                    onClick={() => handleAccion("guardar en favoritos")}
+                    onClick={() => handleFavorito(v.id)}
                     style={{ flex: 1, padding: "10px", backgroundColor: "#1a1a1a", border: "1px solid #222", color: "#fff", borderRadius: "10px", cursor: "pointer", fontSize: "1rem" }}
                   >
                     ❤️

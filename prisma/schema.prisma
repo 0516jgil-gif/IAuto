@@ -14,6 +14,7 @@ model Cliente {
   password         String
   verificationCode String?
   ventas           Venta[]
+  favoritos        Favorito[]
 }
 
 model Empleado {
@@ -34,6 +35,7 @@ model Vehiculo {
   stock    Int
   imagenes String[] // URLs de imágenes en Vercel Blob
   ventas   Venta[]
+  favoritos Favorito[]
 }
 
 model Venta {
@@ -50,4 +52,17 @@ model Venta {
 
   cantidad Int
   total    Float
+}
+
+model Favorito {
+  id    Int      @id @default(autoincrement())
+  fecha DateTime @default(now())
+
+  clienteId  Int
+  vehiculoId Int
+
+  cliente  Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  vehiculo Vehiculo @relation(fields: [vehiculoId], references: [id], onDelete: Cascade)
+
+  @@unique([clienteId, vehiculoId])
 }
