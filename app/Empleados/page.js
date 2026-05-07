@@ -383,8 +383,8 @@ export default function PanelAdmin() {
   const statCards = [
     { label: "Clientes", value: data.clientes.length, icon: "👥", color: "#3b82f6" },
     { label: "Vehículos", value: data.vehiculos.length, icon: "🚗", color: "#10b981" },
-    { label: "Ventas", value: ventasPendientes.length, icon: "💰", color: "#f59e0b" },
     { label: "Canceladas", value: ventasCanceladas.length, icon: "!", color: "#ef4444" },
+    { label: "Ventas", value: ventasRealizadas.length, icon: "💰", color: "#f59e0b" },
     {
       label: "Ingresos",
       value: ventasRealizadas.reduce((s, v) => s + (v.total || 0), 0).toLocaleString() + " €",
