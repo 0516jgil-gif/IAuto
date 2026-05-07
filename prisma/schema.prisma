@@ -8,9 +8,9 @@ generator client {
 }
 
 model Cliente {
-  id               Int     @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   nombre           String
-  email            String  @unique
+  email            String     @unique
   password         String
   verificationCode String?
   ventas           Venta[]
@@ -28,14 +28,24 @@ model Empleado {
 }
 
 model Vehiculo {
-  id       Int      @id @default(autoincrement())
-  marca    String
-  modelo   String
-  precio   Float
-  stock    Int
-  imagenes String[] // URLs de imágenes en Vercel Blob
-  ventas   Venta[]
-  favoritos Favorito[]
+  id          Int      @id @default(autoincrement())
+  marca       String
+  modelo      String
+  precio      Float
+  stock       Int
+  imagenes    String[]
+  anio        Int?
+  combustible String?
+  potencia    Int?
+  transmision String?
+  carroceria  String?
+  color       String?
+  kilometros  Int?
+  puertas     Int?
+  plazas      Int?
+  descripcion String?
+  ventas      Venta[]
+  favoritos   Favorito[]
 }
 
 model Venta {

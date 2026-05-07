@@ -11,11 +11,21 @@ export async function POST(req) {
   const body = await req.json();
   const vehiculo = await prisma.vehiculo.create({
     data: {
-      marca: body.marca,
-      modelo: body.modelo,
-      precio: Number(body.precio),
-      stock: Number(body.stock),
-      imagenes: Array.isArray(body.imagenes) ? body.imagenes : [],
+      marca:       body.marca,
+      modelo:      body.modelo,
+      precio:      Number(body.precio),
+      stock:       Number(body.stock),
+      imagenes:    Array.isArray(body.imagenes) ? body.imagenes : [],
+      anio:        body.anio        ? Number(body.anio)    : null,
+      combustible: body.combustible || null,
+      potencia:    body.potencia    ? Number(body.potencia) : null,
+      transmision: body.transmision || null,
+      carroceria:  body.carroceria  || null,
+      color:       body.color       || null,
+      kilometros:  body.kilometros  ? Number(body.kilometros) : null,
+      puertas:     body.puertas     ? Number(body.puertas)    : null,
+      plazas:      body.plazas      ? Number(body.plazas)     : null,
+      descripcion: body.descripcion || null,
     },
   });
   return NextResponse.json(vehiculo);
@@ -27,29 +37,33 @@ export async function PUT(req) {
     const id = Number(searchParams.get("id"));
     const body = await req.json();
 
-    if (!id) {
-      return NextResponse.json({ error: "ID de vehículo no válido" }, { status: 400 });
-    }
-
-    if (!body.marca || !body.modelo || body.precio === undefined || body.stock === undefined) {
+    if (!id) return NextResponse.json({ error: "ID no válido" }, { status: 400 });
+    if (!body.marca || !body.modelo || body.precio === undefined || body.stock === undefined)
       return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
-    }
 
     const precio = Number(body.precio);
-    const stock = Number(body.stock);
-
-    if (Number.isNaN(precio) || Number.isNaN(stock)) {
+    const stock  = Number(body.stock);
+    if (Number.isNaN(precio) || Number.isNaN(stock))
       return NextResponse.json({ error: "Precio o stock no válido" }, { status: 400 });
-    }
 
     const vehiculo = await prisma.vehiculo.update({
       where: { id },
       data: {
-        marca: body.marca,
-        modelo: body.modelo,
+        marca:       body.marca,
+        modelo:      body.modelo,
         precio,
         stock,
-        imagenes: Array.isArray(body.imagenes) ? body.imagenes : [],
+        imagenes:    Array.isArray(body.imagenes) ? body.imagenes : [],
+        anio:        body.anio        ? Number(body.anio)        : null,
+        combustible: body.combustible || null,
+        potencia:    body.potencia    ? Number(body.potencia)    : null,
+        transmision: body.transmision || null,
+        carroceria:  body.carroceria  || null,
+        color:       body.color       || null,
+        kilometros:  body.kilometros  ? Number(body.kilometros)  : null,
+        puertas:     body.puertas     ? Number(body.puertas)     : null,
+        plazas:      body.plazas      ? Number(body.plazas)      : null,
+        descripcion: body.descripcion || null,
       },
     });
 
@@ -64,26 +78,14 @@ export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);
     const id = Number(searchParams.get("id"));
+    if (!id) return NextResponse.json({ error: "ID no válido" }, { status: 400 });
 
-    if (!id) {
-      return NextResponse.json({ error: "ID de vehículo no válido" }, { status: 400 });
-    }
-
-    await prisma.vehiculo.delete({
-      where: { id },
-    });
-
+    await prisma.vehiculo.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(err);
-
-    if (err.code === "P2003") {
-      return NextResponse.json(
-        { error: "No se puede eliminar este vehículo porque tiene ventas asociadas." },
-        { status: 409 }
-      );
-    }
-
+    if (err.code === "P2003")
+      return NextResponse.json({ error: "No se puede eliminar este vehículo porque tiene ventas asociadas." }, { status: 409 });
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

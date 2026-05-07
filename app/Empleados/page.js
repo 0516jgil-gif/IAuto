@@ -53,20 +53,20 @@ export default function PanelAdmin() {
     const selected = colors[type] || colors.no;
 
     return {
-    backgroundColor: selected.background,
-    color: selected.color,
-    border: `1px solid ${selected.color}`,
-    width: "34px",
-    height: "34px",
-    borderRadius: "50%",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "800",
-    fontSize: "1rem",
-    lineHeight: 1,
-    padding: 0,
+      backgroundColor: selected.background,
+      color: selected.color,
+      border: `1px solid ${selected.color}`,
+      width: "34px",
+      height: "34px",
+      borderRadius: "50%",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontWeight: "800",
+      fontSize: "1rem",
+      lineHeight: 1,
+      padding: 0,
     };
   };
 
@@ -82,22 +82,31 @@ export default function PanelAdmin() {
   const handleEditarVehiculo = (vehiculo) => {
     setEditingItem({ type: "vehiculo", id: vehiculo.id });
     setEditForm({
-      marca: vehiculo.marca || "",
-      modelo: vehiculo.modelo || "",
-      precio: String(vehiculo.precio ?? ""),
-      stock: String(vehiculo.stock ?? ""),
-      imagenes: Array.isArray(vehiculo.imagenes) ? vehiculo.imagenes : [],
+      marca:       vehiculo.marca       || "",
+      modelo:      vehiculo.modelo      || "",
+      precio:      String(vehiculo.precio ?? ""),
+      stock:       String(vehiculo.stock ?? ""),
+      imagenes:    Array.isArray(vehiculo.imagenes) ? vehiculo.imagenes : [],
+      anio:        vehiculo.anio        ?? "",
+      combustible: vehiculo.combustible ?? "",
+      potencia:    vehiculo.potencia    ?? "",
+      transmision: vehiculo.transmision ?? "",
+      carroceria:  vehiculo.carroceria  ?? "",
+      color:       vehiculo.color       ?? "",
+      kilometros:  vehiculo.kilometros  ?? "",
+      puertas:     vehiculo.puertas     ?? "",
+      plazas:      vehiculo.plazas      ?? "",
+      descripcion: vehiculo.descripcion ?? "",
     });
   };
 
   const handleCrearVehiculo = () => {
     setEditingItem({ type: "vehiculoNuevo" });
     setEditForm({
-      marca: "",
-      modelo: "",
-      precio: "",
-      stock: "",
-      imagenes: [],
+      marca: "", modelo: "", precio: "", stock: "", imagenes: [],
+      anio: "", combustible: "", potencia: "", transmision: "",
+      carroceria: "", color: "", kilometros: "", puertas: "",
+      plazas: "", descripcion: "",
     });
   };
 
@@ -120,18 +129,29 @@ export default function PanelAdmin() {
       : isNewVehiculo
         ? "/api/Vehiculos"
         : `/api/Vehiculos?id=${editingItem.id}`;
+
     const payload = isCliente
       ? {
-          nombre: editForm.nombre.trim(),
-          email: editForm.email.trim(),
+          nombre:   editForm.nombre.trim(),
+          email:    editForm.email.trim(),
           telefono: editForm.telefono.trim(),
         }
       : {
-          marca: editForm.marca.trim(),
-          modelo: editForm.modelo.trim(),
-          precio: Number(editForm.precio),
-          stock: Number(editForm.stock),
-          imagenes: Array.isArray(editForm.imagenes) ? editForm.imagenes : [],
+          marca:       editForm.marca.trim(),
+          modelo:      editForm.modelo.trim(),
+          precio:      Number(editForm.precio),
+          stock:       Number(editForm.stock),
+          imagenes:    Array.isArray(editForm.imagenes) ? editForm.imagenes : [],
+          anio:        editForm.anio        ? Number(editForm.anio)        : null,
+          combustible: editForm.combustible || null,
+          potencia:    editForm.potencia    ? Number(editForm.potencia)    : null,
+          transmision: editForm.transmision || null,
+          carroceria:  editForm.carroceria  || null,
+          color:       editForm.color       || null,
+          kilometros:  editForm.kilometros  ? Number(editForm.kilometros)  : null,
+          puertas:     editForm.puertas     ? Number(editForm.puertas)     : null,
+          plazas:      editForm.plazas      ? Number(editForm.plazas)      : null,
+          descripcion: editForm.descripcion || null,
         };
 
     if (isCliente && (!payload.nombre || !payload.email || !payload.telefono)) {
@@ -223,9 +243,7 @@ export default function PanelAdmin() {
     setDeleteSaving(true);
 
     try {
-      const res = await fetch(url, {
-        method: "DELETE",
-      });
+      const res = await fetch(url, { method: "DELETE" });
       const result = await res.json();
 
       if (!res.ok) {
@@ -262,7 +280,6 @@ export default function PanelAdmin() {
 
   const handleProcesarVenta = async (venta) => {
     const confirmar = window.confirm(`¿Quieres procesar la venta #${venta.id}?`);
-
     if (!confirmar) return;
 
     try {
@@ -296,7 +313,6 @@ export default function PanelAdmin() {
       <strong style={{ color: "#fff", textAlign: "right" }}>{value || "-"}</strong>
     </div>
   );
-
 
   if (loading) return (
     <div style={{ backgroundColor: "#000", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", color: "#fff" }}>
@@ -354,26 +370,32 @@ export default function PanelAdmin() {
     outline: "none",
   };
 
+  const inputStyle = {
+    backgroundColor: "#050505",
+    border: "1px solid #333",
+    color: "#fff",
+    borderRadius: "8px",
+    padding: "0.75rem",
+  };
+
+  const labelStyle = {
+    display: "grid",
+    gap: "0.35rem",
+    color: "#aaa",
+    fontSize: "0.85rem",
+  };
+
   const clienteSearchText = clienteSearch.trim().toLowerCase();
   const vehiculoSearchText = vehiculoSearch.trim().toLowerCase();
 
   const filteredClientes = data.clientes.filter(cliente =>
-    [
-      cliente.id,
-      cliente.nombre,
-      cliente.email,
-      cliente.telefono,
-    ].some(value => String(value || "").toLowerCase().includes(clienteSearchText))
+    [cliente.id, cliente.nombre, cliente.email, cliente.telefono]
+      .some(value => String(value || "").toLowerCase().includes(clienteSearchText))
   );
 
   const filteredVehiculos = data.vehiculos.filter(vehiculo =>
-    [
-      vehiculo.id,
-      vehiculo.marca,
-      vehiculo.modelo,
-      vehiculo.precio,
-      vehiculo.stock,
-    ].some(value => String(value || "").toLowerCase().includes(vehiculoSearchText))
+    [vehiculo.id, vehiculo.marca, vehiculo.modelo, vehiculo.precio, vehiculo.stock]
+      .some(value => String(value || "").toLowerCase().includes(vehiculoSearchText))
   );
 
   const ventasPendientes = data.ventas.filter(venta => (venta.estado || "pendiente") === "pendiente");
@@ -381,10 +403,10 @@ export default function PanelAdmin() {
   const ventasCanceladas = data.ventas.filter(venta => venta.estado === "cancelada");
 
   const statCards = [
-    { label: "Clientes", value: data.clientes.length, icon: "👥", color: "#3b82f6" },
-    { label: "Vehículos", value: data.vehiculos.length, icon: "🚗", color: "#10b981" },
-    { label: "Canceladas", value: ventasCanceladas.length, icon: "!", color: "#ef4444" },
-    { label: "Ventas", value: ventasRealizadas.length, icon: "💰", color: "#f59e0b" },
+    { label: "Clientes",   value: data.clientes.length,     icon: "👥", color: "#3b82f6" },
+    { label: "Vehículos",  value: data.vehiculos.length,    icon: "🚗", color: "#10b981" },
+    { label: "Canceladas", value: ventasCanceladas.length,  icon: "!",  color: "#ef4444" },
+    { label: "Ventas",     value: ventasRealizadas.length,  icon: "💰", color: "#f59e0b" },
     {
       label: "Ingresos",
       value: ventasRealizadas.reduce((s, v) => s + (v.total || 0), 0).toLocaleString() + " €",
@@ -416,69 +438,26 @@ export default function PanelAdmin() {
           <span style={{ color: "#aaa", fontSize: "0.9rem" }}>
             Hola, <strong style={{ color: "#fff" }}>{adminName}</strong>
           </span>
-
-          <button
-            onClick={() => window.location.href = "/"}
-            style={{ background: "none", border: "1px solid #333", color: "#aaa", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", fontSize: "0.85rem" }}
-          >
+          <button onClick={() => window.location.href = "/"} style={{ background: "none", border: "1px solid #333", color: "#aaa", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", fontSize: "0.85rem" }}>
             Ver web
           </button>
-
-          <button
-            onClick={handleLogout}
-            style={{ background: "none", border: "1px solid #ef4444", color: "#ef4444", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", fontSize: "0.85rem" }}
-          >
+          <button onClick={handleLogout} style={{ background: "none", border: "1px solid #ef4444", color: "#ef4444", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", fontSize: "0.85rem" }}>
             Salir
           </button>
         </div>
       </header>
 
       <main style={{ padding: "2.5rem 3rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1 style={{ fontSize: "1.8rem", fontWeight: "700", marginBottom: "0.3rem" }}>
-          Panel de Administración
-        </h1>
-
-        <p style={{ color: "#555", marginBottom: "2.5rem", fontSize: "0.9rem" }}>
-          Gestión completa de la plataforma IAuto
-        </p>
+        <h1 style={{ fontSize: "1.8rem", fontWeight: "700", marginBottom: "0.3rem" }}>Panel de Administración</h1>
+        <p style={{ color: "#555", marginBottom: "2.5rem", fontSize: "0.9rem" }}>Gestión completa de la plataforma IAuto</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
           {statCards.map(({ label, value, icon, color }) => (
-            <div key={label} style={{
-              backgroundColor: "#111",
-              borderRadius: "16px",
-              padding: "1.35rem",
-              border: "1px solid #1f1f1f",
-              position: "relative",
-              overflow: "hidden",
-              minHeight: "142px",
-            }}>
-              <div style={{ position: "absolute", top: "-12px", right: "-8px", fontSize: "4.6rem", opacity: 0.14, color, fontWeight: "900", lineHeight: 1 }}>
-                {icon}
-              </div>
-
-              <div style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color,
-                border: `1px solid ${color}`,
-                backgroundColor: `${color}1a`,
-                fontSize: "1.1rem",
-                fontWeight: "900",
-                marginBottom: "0.85rem",
-              }}>{icon}</div>
-
-              <p style={{ color: "#666", fontSize: "0.8rem", marginBottom: "0.3rem", textTransform: "uppercase", letterSpacing: "1px" }}>
-                {label}
-              </p>
-
-              <p style={{ fontSize: "2rem", fontWeight: "800", color, margin: 0 }}>
-                {value}
-              </p>
+            <div key={label} style={{ backgroundColor: "#111", borderRadius: "16px", padding: "1.35rem", border: "1px solid #1f1f1f", position: "relative", overflow: "hidden", minHeight: "142px" }}>
+              <div style={{ position: "absolute", top: "-12px", right: "-8px", fontSize: "4.6rem", opacity: 0.14, color, fontWeight: "900", lineHeight: 1 }}>{icon}</div>
+              <div style={{ width: "34px", height: "34px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color, border: `1px solid ${color}`, backgroundColor: `${color}1a`, fontSize: "1.1rem", fontWeight: "900", marginBottom: "0.85rem" }}>{icon}</div>
+              <p style={{ color: "#666", fontSize: "0.8rem", marginBottom: "0.3rem", textTransform: "uppercase", letterSpacing: "1px" }}>{label}</p>
+              <p style={{ fontSize: "2rem", fontWeight: "800", color, margin: 0 }}>{value}</p>
             </div>
           ))}
         </div>
@@ -494,31 +473,18 @@ export default function PanelAdmin() {
         {tab === "clientes" && (
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
             <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-              <h3 style={{ margin: 0, fontSize: "1rem" }}>
-                Lista de Clientes ({filteredClientes.length})
-              </h3>
-
-              <input
-                type="search"
-                value={clienteSearch}
-                onChange={(e) => setClienteSearch(e.target.value)}
-                placeholder="Buscar cliente..."
-                style={searchInputStyle}
-              />
+              <h3 style={{ margin: 0, fontSize: "1rem" }}>Lista de Clientes ({filteredClientes.length})</h3>
+              <input type="search" value={clienteSearch} onChange={(e) => setClienteSearch(e.target.value)} placeholder="Buscar cliente..." style={searchInputStyle} />
             </div>
-
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#111" }}>
                     {["ID", "Nombre", "Email", "Teléfono", "Acción"].map(h => (
-                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
-                        {h}
-                      </th>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>{h}</th>
                     ))}
                   </tr>
                 </thead>
-
                 <tbody>
                   {filteredClientes.map((c, i) => (
                     <tr key={c.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
@@ -528,21 +494,8 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{c.telefono}</td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
-                          <button
-                            onClick={() => handleEditarCliente(c)}
-                            title="Editar cliente"
-                            style={buttonActionStyle("edit")}
-                          >
-                            ✎
-                          </button>
-
-                          <button
-                            onClick={() => handleDenegarCliente(c)}
-                            title="Denegar cliente"
-                            style={buttonActionStyle("no")}
-                          >
-                            X
-                          </button>
+                          <button onClick={() => handleEditarCliente(c)} title="Editar cliente" style={buttonActionStyle("edit")}>✎</button>
+                          <button onClick={() => handleDenegarCliente(c)} title="Borrar cliente" style={buttonActionStyle("no")}>X</button>
                         </div>
                       </td>
                     </tr>
@@ -556,79 +509,39 @@ export default function PanelAdmin() {
         {tab === "vehiculos" && (
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
             <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-              <h3 style={{ margin: 0, fontSize: "1rem" }}>
-                Inventario de Vehículos ({filteredVehiculos.length})
-              </h3>
-
-              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "nowrap" }}>
-                <input
-                  type="search"
-                  value={vehiculoSearch}
-                  onChange={(e) => setVehiculoSearch(e.target.value)}
-                  placeholder="Buscar vehículo..."
-                  style={{ ...searchInputStyle, width: "250px", maxWidth: "250px" }}
-                />
-
-                <button
-                  onClick={handleCrearVehiculo}
-                  title="Añadir vehículo"
-                  style={buttonActionStyle("add")}
-                >
-                  +
+              <h3 style={{ margin: 0, fontSize: "1rem" }}>Inventario de Vehículos ({filteredVehiculos.length})</h3>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                <input type="search" value={vehiculoSearch} onChange={(e) => setVehiculoSearch(e.target.value)} placeholder="Buscar vehículo..." style={searchInputStyle} />
+                <button onClick={handleCrearVehiculo} style={{ backgroundColor: "#064e3b", border: "1px solid #34d399", color: "#34d399", padding: "0.65rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700", whiteSpace: "nowrap" }}>
+                  + Añadir
                 </button>
               </div>
             </div>
-
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#111" }}>
                     {["ID", "Marca", "Modelo", "Precio", "Stock", "Acción"].map(h => (
-                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
-                        {h}
-                      </th>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>{h}</th>
                     ))}
                   </tr>
                 </thead>
-
                 <tbody>
                   {filteredVehiculos.map((v, i) => (
                     <tr key={v.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{v.id}</td>
                       <td style={{ padding: "1rem 1.5rem", fontWeight: "600" }}>{v.marca}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.modelo}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "600" }}>
-                        {v.precio?.toLocaleString()} €
-                      </td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "600" }}>{v.precio?.toLocaleString()} €</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <span style={{
-                          backgroundColor: v.stock > 0 ? "#064e3b" : "#450a0a",
-                          color: v.stock > 0 ? "#10b981" : "#ef4444",
-                          padding: "3px 10px",
-                          borderRadius: "20px",
-                          fontSize: "0.8rem",
-                          fontWeight: "600",
-                        }}>
+                        <span style={{ backgroundColor: v.stock > 0 ? "#064e3b" : "#450a0a", color: v.stock > 0 ? "#10b981" : "#ef4444", padding: "3px 10px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "600" }}>
                           {v.stock > 0 ? v.stock + " uds." : "Agotado"}
                         </span>
                       </td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
-                          <button
-                            onClick={() => handleEditarVehiculo(v)}
-                            title="Editar vehículo"
-                            style={buttonActionStyle("edit")}
-                          >
-                            ✎
-                          </button>
-
-                          <button
-                            onClick={() => handleDenegarVehiculo(v)}
-                            title="Denegar vehículo"
-                            style={buttonActionStyle("no")}
-                          >
-                            X
-                          </button>
+                          <button onClick={() => handleEditarVehiculo(v)} title="Editar vehículo" style={buttonActionStyle("edit")}>✎</button>
+                          <button onClick={() => handleDenegarVehiculo(v)} title="Borrar vehículo" style={buttonActionStyle("no")}>X</button>
                         </div>
                       </td>
                     </tr>
@@ -642,23 +555,17 @@ export default function PanelAdmin() {
         {tab === "ventas" && (
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
             <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a" }}>
-              <h3 style={{ margin: 0, fontSize: "1rem" }}>
-                Registro de Ventas Pendientes ({ventasPendientes.length})
-              </h3>
+              <h3 style={{ margin: 0, fontSize: "1rem" }}>Registro de Ventas Pendientes ({ventasPendientes.length})</h3>
             </div>
-
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#111" }}>
                     {["ID", "Cliente", "Empleado", "Vehículo", "Cant.", "Total", "Fecha", "Acción"].map(h => (
-                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
-                        {h}
-                      </th>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>{h}</th>
                     ))}
                   </tr>
                 </thead>
-
                 <tbody>
                   {ventasPendientes.map((v, i) => (
                     <tr key={v.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
@@ -667,37 +574,13 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
                       <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#f59e0b", fontWeight: "600" }}>
-                        {v.total?.toLocaleString()} €
-                      </td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>
-                        {v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}
-                      </td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#f59e0b", fontWeight: "600" }}>{v.total?.toLocaleString()} €</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>{v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}</td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
-                          <button
-                            onClick={() => setVentaInfo(v)}
-                            title="Información de venta"
-                            style={buttonActionStyle("info")}
-                          >
-                            i
-                          </button>
-
-                          <button
-                            onClick={() => handleProcesarVenta(v)}
-                            title="Procesar venta"
-                            style={buttonActionStyle("ok")}
-                          >
-                            ✓
-                          </button>
-
-                          <button
-                            onClick={() => handleDenegarVenta(v)}
-                            title="Denegar venta"
-                            style={buttonActionStyle("no")}
-                          >
-                            X
-                          </button>
+                          <button onClick={() => setVentaInfo(v)} title="Información" style={buttonActionStyle("info")}>i</button>
+                          <button onClick={() => handleProcesarVenta(v)} title="Procesar" style={buttonActionStyle("ok")}>✓</button>
+                          <button onClick={() => handleDenegarVenta(v)} title="Cancelar" style={buttonActionStyle("no")}>X</button>
                         </div>
                       </td>
                     </tr>
@@ -711,26 +594,18 @@ export default function PanelAdmin() {
         {tab === "ventas" && (
           <div style={{ backgroundColor: "#07130d", borderRadius: "16px", border: "1px solid #064e3b", overflow: "hidden", marginTop: "1.5rem" }}>
             <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #064e3b", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
-              <h3 style={{ margin: 0, fontSize: "1rem", color: "#10b981" }}>
-                Ventas Realizadas ({ventasRealizadas.length})
-              </h3>
-              <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
-                Realizadas
-              </span>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "#10b981" }}>Ventas Realizadas ({ventasRealizadas.length})</h3>
+              <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>Realizadas</span>
             </div>
-
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#052e1a" }}>
                     {["ID", "Cliente", "Empleado", "Vehículo", "Cant.", "Total", "Fecha", "Estado", "Acción"].map(h => (
-                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
-                        {h}
-                      </th>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>{h}</th>
                     ))}
                   </tr>
                 </thead>
-
                 <tbody>
                   {ventasRealizadas.map((v, i) => (
                     <tr key={v.id} style={{ borderTop: "1px solid #064e3b", backgroundColor: i % 2 === 0 ? "rgba(6,78,59,0.16)" : "rgba(6,78,59,0.08)" }}>
@@ -739,26 +614,14 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
                       <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "800" }}>
-                        {v.total?.toLocaleString()} €
-                      </td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>
-                        {v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}
-                      </td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "800" }}>{v.total?.toLocaleString()} €</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>{v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
-                          Realizada
-                        </span>
+                        <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>Realizada</span>
                       </td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
-                          <button
-                            onClick={() => setVentaInfo(v)}
-                            title="Información de venta"
-                            style={buttonActionStyle("info")}
-                          >
-                            i
-                          </button>
+                          <button onClick={() => setVentaInfo(v)} title="Información" style={buttonActionStyle("info")}>i</button>
                         </div>
                       </td>
                     </tr>
@@ -772,26 +635,18 @@ export default function PanelAdmin() {
         {tab === "ventas" && (
           <div style={{ backgroundColor: "#170808", borderRadius: "16px", border: "1px solid #7f1d1d", overflow: "hidden", marginTop: "1.5rem" }}>
             <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #7f1d1d", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
-              <h3 style={{ margin: 0, fontSize: "1rem", color: "#ef4444" }}>
-                Ventas Canceladas ({ventasCanceladas.length})
-              </h3>
-              <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
-                Canceladas
-              </span>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "#ef4444" }}>Ventas Canceladas ({ventasCanceladas.length})</h3>
+              <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>Canceladas</span>
             </div>
-
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#450a0a" }}>
                     {["ID", "Cliente", "Empleado", "Vehículo", "Cant.", "Total", "Fecha", "Estado", "Acción"].map(h => (
-                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
-                        {h}
-                      </th>
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>{h}</th>
                     ))}
                   </tr>
                 </thead>
-
                 <tbody>
                   {ventasCanceladas.map((v, i) => (
                     <tr key={v.id} style={{ borderTop: "1px solid #7f1d1d", backgroundColor: i % 2 === 0 ? "rgba(127,29,29,0.18)" : "rgba(127,29,29,0.1)" }}>
@@ -800,26 +655,14 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
                       <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#fca5a5", fontWeight: "800" }}>
-                        {v.total?.toLocaleString()} €
-                      </td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>
-                        {v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}
-                      </td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#fca5a5", fontWeight: "800" }}>{v.total?.toLocaleString()} €</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>{v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
-                        <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
-                          Cancelada
-                        </span>
+                        <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>Cancelada</span>
                       </td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
-                          <button
-                            onClick={() => setVentaInfo(v)}
-                            title="Información de venta"
-                            style={buttonActionStyle("info")}
-                          >
-                            i
-                          </button>
+                          <button onClick={() => setVentaInfo(v)} title="Información" style={buttonActionStyle("info")}>i</button>
                         </div>
                       </td>
                     </tr>
@@ -831,28 +674,12 @@ export default function PanelAdmin() {
         )}
       </main>
 
+      {/* MODAL EDICIÓN */}
       {editingItem && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.72)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "1rem",
-          zIndex: 1000,
-        }}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000, overflowY: "auto" }}>
           <form
             onSubmit={handleGuardarEdicion}
-            style={{
-              width: "100%",
-              maxWidth: "460px",
-              backgroundColor: "#0d0d0d",
-              border: "1px solid #262626",
-              borderRadius: "16px",
-              padding: "1.5rem",
-              boxShadow: "0 24px 70px rgba(0, 0, 0, 0.55)",
-            }}
+            style={{ width: "100%", maxWidth: "500px", backgroundColor: "#0d0d0d", border: "1px solid #262626", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)", margin: "auto" }}
           >
             <h2 style={{ margin: "0 0 1rem", fontSize: "1.2rem" }}>
               {editingItem.type === "cliente" ? "Editar cliente" : editingItem.type === "vehiculoNuevo" ? "Añadir vehículo" : "Editar vehículo"}
@@ -861,126 +688,123 @@ export default function PanelAdmin() {
             <div style={{ display: "grid", gap: "0.9rem" }}>
               {editingItem.type === "cliente" ? (
                 <>
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                  <label style={labelStyle}>
                     Nombre
-                    <input
-                      value={editForm.nombre || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, nombre: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                    <input value={editForm.nombre || ""} onChange={(e) => setEditForm(prev => ({ ...prev, nombre: e.target.value }))} style={inputStyle} />
                   </label>
-
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                  <label style={labelStyle}>
                     Email
-                    <input
-                      type="email"
-                      value={editForm.email || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                    <input type="email" value={editForm.email || ""} onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))} style={inputStyle} />
                   </label>
-
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                  <label style={labelStyle}>
                     Teléfono
-                    <input
-                      value={editForm.telefono || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, telefono: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                    <input value={editForm.telefono || ""} onChange={(e) => setEditForm(prev => ({ ...prev, telefono: e.target.value }))} style={inputStyle} />
                   </label>
                 </>
               ) : (
                 <>
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                  {/* ── Campos básicos ── */}
+                  <label style={labelStyle}>
                     Marca
-                    <input
-                      value={editForm.marca || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, marca: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                    <input value={editForm.marca || ""} onChange={(e) => setEditForm(prev => ({ ...prev, marca: e.target.value }))} style={inputStyle} />
                   </label>
-
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                  <label style={labelStyle}>
                     Modelo
-                    <input
-                      value={editForm.modelo || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, modelo: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                    <input value={editForm.modelo || ""} onChange={(e) => setEditForm(prev => ({ ...prev, modelo: e.target.value }))} style={inputStyle} />
                   </label>
-
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
-                    Precio
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={editForm.precio || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, precio: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                  <label style={labelStyle}>
+                    Precio (€)
+                    <input type="number" step="0.01" min="0" value={editForm.precio || ""} onChange={(e) => setEditForm(prev => ({ ...prev, precio: e.target.value }))} style={inputStyle} />
                   </label>
-
-                  <label style={{ display: "grid", gap: "0.35rem", color: "#aaa", fontSize: "0.85rem" }}>
+                  <label style={labelStyle}>
                     Stock
-                    <input
-                      type="number"
-                      min="0"
-                      value={editForm.stock || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, stock: e.target.value }))}
-                      style={{ backgroundColor: "#050505", border: "1px solid #333", color: "#fff", borderRadius: "8px", padding: "0.75rem" }}
-                    />
+                    <input type="number" min="0" value={editForm.stock || ""} onChange={(e) => setEditForm(prev => ({ ...prev, stock: e.target.value }))} style={inputStyle} />
+                  </label>
+
+                  {/* ── Campos nuevos de especificaciones ── */}
+                  <label style={labelStyle}>
+                    Año
+                    <input type="number" min="1900" max="2030" placeholder="Ej: 2022" value={editForm.anio || ""} onChange={(e) => setEditForm(prev => ({ ...prev, anio: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Combustible
+                    <select value={editForm.combustible || ""} onChange={(e) => setEditForm(prev => ({ ...prev, combustible: e.target.value }))} style={inputStyle}>
+                      <option value="">— Seleccionar —</option>
+                      <option value="Gasolina">Gasolina</option>
+                      <option value="Diésel">Diésel</option>
+                      <option value="Híbrido">Híbrido</option>
+                      <option value="Híbrido enchufable">Híbrido enchufable</option>
+                      <option value="Eléctrico">Eléctrico</option>
+                      <option value="GLP">GLP</option>
+                    </select>
+                  </label>
+                  <label style={labelStyle}>
+                    Potencia (CV)
+                    <input type="number" min="0" placeholder="Ej: 150" value={editForm.potencia || ""} onChange={(e) => setEditForm(prev => ({ ...prev, potencia: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Transmisión
+                    <select value={editForm.transmision || ""} onChange={(e) => setEditForm(prev => ({ ...prev, transmision: e.target.value }))} style={inputStyle}>
+                      <option value="">— Seleccionar —</option>
+                      <option value="Manual">Manual</option>
+                      <option value="Automático">Automático</option>
+                      <option value="Semiautomático">Semiautomático</option>
+                    </select>
+                  </label>
+                  <label style={labelStyle}>
+                    Carrocería
+                    <select value={editForm.carroceria || ""} onChange={(e) => setEditForm(prev => ({ ...prev, carroceria: e.target.value }))} style={inputStyle}>
+                      <option value="">— Seleccionar —</option>
+                      <option value="Sedán">Sedán</option>
+                      <option value="SUV">SUV</option>
+                      <option value="Hatchback">Hatchback</option>
+                      <option value="Familiar">Familiar</option>
+                      <option value="Coupé">Coupé</option>
+                      <option value="Cabrio">Cabrio</option>
+                      <option value="Monovolumen">Monovolumen</option>
+                      <option value="Pickup">Pickup</option>
+                    </select>
+                  </label>
+                  <label style={labelStyle}>
+                    Color
+                    <input placeholder="Ej: Negro, Blanco perla..." value={editForm.color || ""} onChange={(e) => setEditForm(prev => ({ ...prev, color: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Kilómetros
+                    <input type="number" min="0" placeholder="Ej: 45000" value={editForm.kilometros || ""} onChange={(e) => setEditForm(prev => ({ ...prev, kilometros: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Puertas
+                    <input type="number" min="2" max="6" placeholder="Ej: 5" value={editForm.puertas || ""} onChange={(e) => setEditForm(prev => ({ ...prev, puertas: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Plazas
+                    <input type="number" min="1" max="9" placeholder="Ej: 5" value={editForm.plazas || ""} onChange={(e) => setEditForm(prev => ({ ...prev, plazas: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Descripción
+                    <textarea rows={3} placeholder="Descripción del vehículo..." value={editForm.descripcion || ""} onChange={(e) => setEditForm(prev => ({ ...prev, descripcion: e.target.value }))} style={{ ...inputStyle, resize: "vertical" }} />
                   </label>
 
                   {/* ── Sección de imágenes ── */}
                   <div style={{ display: "grid", gap: "0.5rem" }}>
-                    <span style={{ color: "#aaa", fontSize: "0.85rem" }}>
-                      Imágenes ({(editForm.imagenes || []).length}/5)
-                    </span>
-
-                    {/* Miniaturas de imágenes actuales */}
+                    <span style={{ color: "#aaa", fontSize: "0.85rem" }}>Imágenes ({(editForm.imagenes || []).length}/5)</span>
                     {(editForm.imagenes || []).length > 0 && (
                       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                         {(editForm.imagenes || []).map((url, i) => (
                           <div key={i} style={{ position: "relative", width: "64px", height: "48px" }}>
-                            <img
-                              src={url}
-                              alt={`img ${i + 1}`}
-                              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #333" }}
-                            />
-                            {/* Botón eliminar imagen */}
+                            <img src={url} alt={`img ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #333" }} />
                             <button
                               type="button"
-                              onClick={() => setEditForm(prev => ({
-                                ...prev,
-                                imagenes: prev.imagenes.filter((_, idx) => idx !== i)
-                              }))}
-                              style={{
-                                position: "absolute", top: "-6px", right: "-6px",
-                                width: "18px", height: "18px", borderRadius: "50%",
-                                backgroundColor: "#ef4444", border: "none",
-                                color: "#fff", cursor: "pointer",
-                                fontSize: "0.65rem", fontWeight: "800",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                lineHeight: 1, padding: 0,
-                              }}
-                            >
-                              ✕
-                            </button>
+                              onClick={() => setEditForm(prev => ({ ...prev, imagenes: prev.imagenes.filter((_, idx) => idx !== i) }))}
+                              style={{ position: "absolute", top: "-6px", right: "-6px", width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#ef4444", border: "none", color: "#fff", cursor: "pointer", fontSize: "0.65rem", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, padding: 0 }}
+                            >✕</button>
                           </div>
                         ))}
                       </div>
                     )}
-
-                    {/* Botón subir nueva imagen */}
                     {(editForm.imagenes || []).length < 5 && (
-                      <label style={{
-                        display: "flex", alignItems: "center", gap: "0.5rem",
-                        backgroundColor: "#050505", border: "1px dashed #333",
-                        borderRadius: "8px", padding: "0.75rem",
-                        cursor: uploadingImg ? "not-allowed" : "pointer",
-                        color: "#555", fontSize: "0.85rem",
-                      }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#050505", border: "1px dashed #333", borderRadius: "8px", padding: "0.75rem", cursor: uploadingImg ? "not-allowed" : "pointer", color: "#555", fontSize: "0.85rem" }}>
                         <input
                           type="file"
                           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -996,10 +820,7 @@ export default function PanelAdmin() {
                               const res = await fetch("/api/upload", { method: "POST", body: fd });
                               const data = await res.json();
                               if (!res.ok) { alert(data.error || "Error al subir imagen"); return; }
-                              setEditForm(prev => ({
-                                ...prev,
-                                imagenes: [...(prev.imagenes || []), data.url],
-                              }));
+                              setEditForm(prev => ({ ...prev, imagenes: [...(prev.imagenes || []), data.url] }));
                             } catch {
                               alert("Error al subir imagen");
                             } finally {
@@ -1017,20 +838,10 @@ export default function PanelAdmin() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.5rem" }}>
-              <button
-                type="button"
-                onClick={handleCancelarEdicion}
-                disabled={editSaving}
-                style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
-              >
+              <button type="button" onClick={handleCancelarEdicion} disabled={editSaving} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
                 Cancelar
               </button>
-
-              <button
-                type="submit"
-                disabled={editSaving}
-                style={{ backgroundColor: "#2563eb", border: "1px solid #60a5fa", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
-              >
+              <button type="submit" disabled={editSaving} style={{ backgroundColor: "#2563eb", border: "1px solid #60a5fa", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
                 {editSaving ? "Guardando..." : "Aceptar"}
               </button>
             </div>
@@ -1038,63 +849,20 @@ export default function PanelAdmin() {
         </div>
       )}
 
+      {/* MODAL BORRADO */}
       {deleteItem && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.72)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "1rem",
-          zIndex: 1000,
-        }}>
-          <div style={{
-            width: "100%",
-            maxWidth: "430px",
-            backgroundColor: "#0d0d0d",
-            border: "1px solid #7f1d1d",
-            borderRadius: "16px",
-            padding: "1.5rem",
-            boxShadow: "0 24px 70px rgba(0, 0, 0, 0.55)",
-          }}>
-            <h2 style={{ margin: "0 0 0.6rem", fontSize: "1.2rem" }}>
-              Confirmar borrado
-            </h2>
-
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
+          <div style={{ width: "100%", maxWidth: "430px", backgroundColor: "#0d0d0d", border: "1px solid #7f1d1d", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
+            <h2 style={{ margin: "0 0 0.6rem", fontSize: "1.2rem" }}>Confirmar borrado</h2>
             <p style={{ color: "#aaa", lineHeight: 1.5, margin: "0 0 1rem" }}>
               ¿Seguro que quieres {deleteItem.type === "venta" ? "cancelar" : "borrar"} {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : "la venta"}?
             </p>
-
-            <div style={{
-              backgroundColor: "#050505",
-              border: "1px solid #262626",
-              borderRadius: "10px",
-              padding: "0.9rem",
-              color: "#fff",
-              fontWeight: "800",
-              marginBottom: "1.2rem",
-              textAlign: "center",
-            }}>
+            <div style={{ backgroundColor: "#050505", border: "1px solid #262626", borderRadius: "10px", padding: "0.9rem", color: "#fff", fontWeight: "800", marginBottom: "1.2rem", textAlign: "center" }}>
               {deleteItem.name}
             </div>
-
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
-              <button
-                type="button"
-                onClick={handleCancelarBorrado}
-                disabled={deleteSaving}
-                style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                onClick={handleConfirmarBorrado}
-                disabled={deleteSaving}
-                style={{ backgroundColor: "#991b1b", border: "1px solid #ef4444", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
-              >
+              <button type="button" onClick={handleCancelarBorrado} disabled={deleteSaving} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>Cancelar</button>
+              <button type="button" onClick={handleConfirmarBorrado} disabled={deleteSaving} style={{ backgroundColor: "#991b1b", border: "1px solid #ef4444", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
                 {deleteSaving ? "Procesando..." : "Aceptar"}
               </button>
             </div>
@@ -1102,36 +870,17 @@ export default function PanelAdmin() {
         </div>
       )}
 
+      {/* MODAL INFO VENTA */}
       {ventaInfo && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.72)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "1rem",
-          zIndex: 1000,
-        }}>
-          <div style={{
-            width: "100%",
-            maxWidth: "500px",
-            backgroundColor: "#0d0d0d",
-            border: "1px solid #2563eb",
-            borderRadius: "16px",
-            padding: "1.5rem",
-            boxShadow: "0 24px 70px rgba(0, 0, 0, 0.55)",
-          }}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
+          <div style={{ width: "100%", maxWidth: "500px", backgroundColor: "#0d0d0d", border: "1px solid #2563eb", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", marginBottom: "1rem" }}>
               <div>
-                <p style={{ color: "#60a5fa", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>
-                  Información de venta
-                </p>
+                <p style={{ color: "#60a5fa", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>Información de venta</p>
                 <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Venta #{ventaInfo.id}</h2>
               </div>
               <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #333", color: "#aaa", borderRadius: "8px", width: "34px", height: "34px", cursor: "pointer" }}>x</button>
             </div>
-
             {detalleVentaLinea("Cliente", ventaInfo.cliente?.nombre)}
             {detalleVentaLinea("Email cliente", ventaInfo.cliente?.email)}
             {detalleVentaLinea("Empleado", ventaInfo.empleado?.nombre)}
@@ -1140,11 +889,8 @@ export default function PanelAdmin() {
             {detalleVentaLinea("Total", `${ventaInfo.total?.toLocaleString()} €`)}
             {detalleVentaLinea("Fecha", ventaInfo.fecha ? new Date(ventaInfo.fecha).toLocaleDateString("es-ES") : "-")}
             {detalleVentaLinea("Estado", ventaInfo.estado === "realizada" ? "Realizada" : ventaInfo.estado === "cancelada" ? "Cancelada" : "Pendiente")}
-
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.2rem" }}>
-              <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
-                Cerrar
-              </button>
+              <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>Cerrar</button>
               {(ventaInfo.estado || "pendiente") === "pendiente" && (
                 <button onClick={() => { const venta = ventaInfo; setVentaInfo(null); handleProcesarVenta(venta); }} style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", color: "#10b981", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "800" }}>
                   Procesar
