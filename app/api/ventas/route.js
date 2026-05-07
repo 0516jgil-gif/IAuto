@@ -1,14 +1,18 @@
 export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { sendSaleConfirmationEmail } from "@/lib/email";
+import { sendSaleCancellationEmail, sendSaleConfirmationEmail } from "@/lib/email";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const clienteId = Number(searchParams.get("clienteId"));
+  const estado = searchParams.get("estado");
 
   const ventas = await prisma.venta.findMany({
-    where: clienteId ? { clienteId } : undefined,
+    where: {
+      ...(clienteId ? { clienteId } : {}),
+      ...(estado ? { estado } : clienteId ? { estado: "pendiente" } : {}),
+    },
     include: { cliente: true, empleado: true, vehiculo: true },
     orderBy: { fecha: "desc" },
   });
@@ -88,12 +92,18 @@ export async function PATCH(req) {
       return NextResponse.json({ error: "El cliente no tiene email asociado" }, { status: 400 });
     }
 
+    if (venta.estado === "realizada") {
+      return NextResponse.json({ ok: true, venta });
+    }
+
     await sendSaleConfirmationEmail(venta.cliente.email, venta);
-    await prisma.venta.delete({
+    const ventaRealizada = await prisma.venta.update({
       where: { id },
+      data: { estado: "realizada" },
+      include: { cliente: true, empleado: true, vehiculo: true },
     });
 
-    return NextResponse.json({ ok: true, venta });
+    return NextResponse.json({ ok: true, venta: ventaRealizada });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: err.message || "No se pudo procesar la venta" }, { status: 500 });
@@ -111,10 +121,15 @@ export async function DELETE(req) {
 
     const venta = await prisma.venta.findUnique({
       where: { id },
+      include: { cliente: true, empleado: true, vehiculo: true },
     });
 
     if (!venta) {
       return NextResponse.json({ error: "Venta no encontrada" }, { status: 404 });
+    }
+
+    if (venta.cliente?.email) {
+      await sendSaleCancellationEmail(venta.cliente.email, venta);
     }
 
     await prisma.$transaction([

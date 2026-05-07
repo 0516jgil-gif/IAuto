@@ -241,7 +241,7 @@ export default function PanelAdmin() {
           : prev.clientes,
         vehiculos: isVehiculo
           ? prev.vehiculos.filter(v => v.id !== deleteItem.id)
-          : deleteItem.type === "venta"
+          : deleteItem.type === "venta" && deleteItem.venta?.estado !== "realizada"
             ? prev.vehiculos.map(vehiculo =>
                 vehiculo.id === deleteItem.venta.vehiculoId
                   ? { ...vehiculo, stock: vehiculo.stock + deleteItem.venta.cantidad }
@@ -280,7 +280,7 @@ export default function PanelAdmin() {
 
       setData(prev => ({
         ...prev,
-        ventas: prev.ventas.filter(v => v.id !== venta.id),
+        ventas: prev.ventas.map(v => v.id === venta.id ? data.venta : v),
       }));
       alert("La venta se ha procesado correctamente y se ha enviado el email al cliente.");
     } catch (error) {
@@ -376,13 +376,16 @@ export default function PanelAdmin() {
     ].some(value => String(value || "").toLowerCase().includes(vehiculoSearchText))
   );
 
+  const ventasPendientes = data.ventas.filter(venta => (venta.estado || "pendiente") === "pendiente");
+  const ventasRealizadas = data.ventas.filter(venta => venta.estado === "realizada");
+
   const statCards = [
     { label: "Clientes", value: data.clientes.length, icon: "👥", color: "#3b82f6" },
     { label: "Vehículos", value: data.vehiculos.length, icon: "🚗", color: "#10b981" },
-    { label: "Ventas", value: data.ventas.length, icon: "💰", color: "#f59e0b" },
+    { label: "Ventas", value: ventasPendientes.length, icon: "💰", color: "#f59e0b" },
     {
       label: "Ingresos",
-      value: data.ventas.reduce((s, v) => s + (v.total || 0), 0).toLocaleString() + " €",
+      value: ventasRealizadas.reduce((s, v) => s + (v.total || 0), 0).toLocaleString() + " €",
       icon: "📈",
       color: "#8b5cf6",
     },
@@ -624,7 +627,7 @@ export default function PanelAdmin() {
           <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
             <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a" }}>
               <h3 style={{ margin: 0, fontSize: "1rem" }}>
-                Registro de Ventas ({data.ventas.length})
+                Registro de Ventas Pendientes ({ventasPendientes.length})
               </h3>
             </div>
 
@@ -641,7 +644,7 @@ export default function PanelAdmin() {
                 </thead>
 
                 <tbody>
-                  {data.ventas.map((v, i) => (
+                  {ventasPendientes.map((v, i) => (
                     <tr key={v.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{v.id}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.cliente?.nombre}</td>
@@ -678,6 +681,67 @@ export default function PanelAdmin() {
                             style={buttonActionStyle("no")}
                           >
                             X
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {tab === "ventas" && (
+          <div style={{ backgroundColor: "#07130d", borderRadius: "16px", border: "1px solid #064e3b", overflow: "hidden", marginTop: "1.5rem" }}>
+            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #064e3b", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "#10b981" }}>
+                Ventas Realizadas ({ventasRealizadas.length})
+              </h3>
+              <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
+                Realizadas
+              </span>
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#052e1a" }}>
+                    {["ID", "Cliente", "Empleado", "Vehículo", "Cant.", "Total", "Fecha", "Estado", "Acción"].map(h => (
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {ventasRealizadas.map((v, i) => (
+                    <tr key={v.id} style={{ borderTop: "1px solid #064e3b", backgroundColor: i % 2 === 0 ? "rgba(6,78,59,0.16)" : "rgba(6,78,59,0.08)" }}>
+                      <td style={{ padding: "1rem 1.5rem", color: "#6ee7b7", fontSize: "0.85rem" }}>#{v.id}</td>
+                      <td style={{ padding: "1rem 1.5rem" }}>{v.cliente?.nombre}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
+                      <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
+                      <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "800" }}>
+                        {v.total?.toLocaleString()} €
+                      </td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>
+                        {v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}
+                      </td>
+                      <td style={{ padding: "1rem 1.5rem" }}>
+                        <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
+                          Realizada
+                        </span>
+                      </td>
+                      <td style={actionCellStyle}>
+                        <div style={actionButtonsStyle}>
+                          <button
+                            onClick={() => setVentaInfo(v)}
+                            title="Información de venta"
+                            style={buttonActionStyle("info")}
+                          >
+                            i
                           </button>
                         </div>
                       </td>
@@ -922,7 +986,7 @@ export default function PanelAdmin() {
             </h2>
 
             <p style={{ color: "#aaa", lineHeight: 1.5, margin: "0 0 1rem" }}>
-              ¿Seguro que quieres borrar {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : "la venta"}?
+              ¿Seguro que quieres {deleteItem.type === "venta" ? "cancelar" : "borrar"} {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : "la venta"}?
             </p>
 
             <div style={{
@@ -954,7 +1018,7 @@ export default function PanelAdmin() {
                 disabled={deleteSaving}
                 style={{ backgroundColor: "#991b1b", border: "1px solid #ef4444", color: "#fff", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
               >
-                {deleteSaving ? "Borrando..." : "Aceptar"}
+                {deleteSaving ? "Procesando..." : "Aceptar"}
               </button>
             </div>
           </div>
@@ -998,15 +1062,17 @@ export default function PanelAdmin() {
             {detalleVentaLinea("Cantidad", `${ventaInfo.cantidad} unidad(es)`)}
             {detalleVentaLinea("Total", `${ventaInfo.total?.toLocaleString()} €`)}
             {detalleVentaLinea("Fecha", ventaInfo.fecha ? new Date(ventaInfo.fecha).toLocaleDateString("es-ES") : "-")}
-            {detalleVentaLinea("Estado", "Registrada")}
+            {detalleVentaLinea("Estado", ventaInfo.estado === "realizada" ? "Realizada" : "Pendiente")}
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.2rem" }}>
               <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
                 Cerrar
               </button>
-              <button onClick={() => { const venta = ventaInfo; setVentaInfo(null); handleProcesarVenta(venta); }} style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", color: "#10b981", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "800" }}>
-                Procesar
-              </button>
+              {(ventaInfo.estado || "pendiente") === "pendiente" && (
+                <button onClick={() => { const venta = ventaInfo; setVentaInfo(null); handleProcesarVenta(venta); }} style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", color: "#10b981", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "800" }}>
+                  Procesar
+                </button>
+              )}
             </div>
           </div>
         </div>

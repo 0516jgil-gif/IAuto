@@ -52,6 +52,7 @@ model Venta {
 
   cantidad Int
   total    Float
+  estado   String @default("pendiente")
 }
 
 model Favorito {
