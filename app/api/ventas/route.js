@@ -39,7 +39,10 @@ export async function POST(req) {
     return NextResponse.json({ error: "Stock insuficiente" }, { status: 400 });
   }
 
-  const total = vehiculo.precio * cantidad;
+  const totalRecibido = Number(body.total);
+  const total = Number.isFinite(totalRecibido) && totalRecibido >= 0
+    ? totalRecibido
+    : vehiculo.precio * cantidad;
 
   const [venta] = await prisma.$transaction([
     prisma.venta.create({

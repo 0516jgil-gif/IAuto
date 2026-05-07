@@ -169,8 +169,23 @@ export default function Perfil() {
                 <div style={{ textAlign: "right", display: "grid", justifyItems: "end", gap: "0.5rem" }}>
                   <p style={{ margin: "0 0 0.5rem", color: "#10b981", fontWeight: "800" }}>{venta.total?.toLocaleString()} EUR</p>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <button onClick={() => setVentaInfo(venta)} style={{ padding: "7px 12px", backgroundColor: "#172554", color: "#60a5fa", border: "1px solid #60a5fa", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
-                      Info
+                    <button
+                      onClick={() => setVentaInfo(venta)}
+                      title="Información de compra"
+                      style={{
+                        width: "34px",
+                        height: "34px",
+                        borderRadius: "50%",
+                        backgroundColor: "#172554",
+                        color: "#60a5fa",
+                        border: "1px solid #60a5fa",
+                        cursor: "pointer",
+                        fontWeight: "800",
+                        fontSize: "1rem",
+                        lineHeight: 1,
+                      }}
+                    >
+                      i
                     </button>
                     <button onClick={() => window.location.href = `/Vehiculos/${venta.vehiculoId}`} style={{ padding: "7px 12px", backgroundColor: "#1a1a1a", color: "#fff", border: "1px solid #222", borderRadius: "8px", cursor: "pointer" }}>
                       Ver coche

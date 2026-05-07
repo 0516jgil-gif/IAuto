@@ -83,7 +83,7 @@ export default function VehiculoDetalle() {
     const res = await fetch("/api/ventas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clienteId, vehiculoId: vehiculo.id, cantidad: 1 }),
+      body: JSON.stringify({ clienteId, vehiculoId: vehiculo.id, cantidad: 1, total: totalEstimado }),
     });
     const data = await res.json();
     setComprando(false);
