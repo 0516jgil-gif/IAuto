@@ -9,7 +9,15 @@ export async function GET() {
 
 export async function POST(req) {
   const body = await req.json();
-  const vehiculo = await prisma.vehiculo.create({ data: body });
+  const vehiculo = await prisma.vehiculo.create({
+    data: {
+      marca: body.marca,
+      modelo: body.modelo,
+      precio: Number(body.precio),
+      stock: Number(body.stock),
+      imagenes: Array.isArray(body.imagenes) ? body.imagenes : [],
+    },
+  });
   return NextResponse.json(vehiculo);
 }
 
@@ -41,6 +49,7 @@ export async function PUT(req) {
         modelo: body.modelo,
         precio,
         stock,
+        imagenes: Array.isArray(body.imagenes) ? body.imagenes : [],
       },
     });
 
