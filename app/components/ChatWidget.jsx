@@ -88,7 +88,7 @@ export default function ChatWidget() {
                   backgroundColor: m.role === "user" ? "#3b82f6" : "#1a1a1a",
                   color: "#fff", fontSize: "0.85rem", lineHeight: "1.5",
                 }}>
-                  {m.content}
+                  {m.content.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1')}
                 </div>
               </div>
             ))}
