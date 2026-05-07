@@ -241,7 +241,7 @@ export default function PanelAdmin() {
           : prev.clientes,
         vehiculos: isVehiculo
           ? prev.vehiculos.filter(v => v.id !== deleteItem.id)
-          : deleteItem.type === "venta" && deleteItem.venta?.estado !== "realizada"
+          : deleteItem.type === "venta" && deleteItem.venta?.estado === "pendiente"
             ? prev.vehiculos.map(vehiculo =>
                 vehiculo.id === deleteItem.venta.vehiculoId
                   ? { ...vehiculo, stock: vehiculo.stock + deleteItem.venta.cantidad }
@@ -249,7 +249,7 @@ export default function PanelAdmin() {
               )
             : prev.vehiculos,
         ventas: deleteItem.type === "venta"
-          ? prev.ventas.filter(v => v.id !== deleteItem.id)
+          ? prev.ventas.map(v => v.id === deleteItem.id ? result.venta : v)
           : prev.ventas,
       }));
       handleCancelarBorrado();
@@ -378,11 +378,13 @@ export default function PanelAdmin() {
 
   const ventasPendientes = data.ventas.filter(venta => (venta.estado || "pendiente") === "pendiente");
   const ventasRealizadas = data.ventas.filter(venta => venta.estado === "realizada");
+  const ventasCanceladas = data.ventas.filter(venta => venta.estado === "cancelada");
 
   const statCards = [
     { label: "Clientes", value: data.clientes.length, icon: "👥", color: "#3b82f6" },
     { label: "Vehículos", value: data.vehiculos.length, icon: "🚗", color: "#10b981" },
     { label: "Ventas", value: ventasPendientes.length, icon: "💰", color: "#f59e0b" },
+    { label: "Canceladas", value: ventasCanceladas.length, icon: "×", color: "#ef4444" },
     {
       label: "Ingresos",
       value: ventasRealizadas.reduce((s, v) => s + (v.total || 0), 0).toLocaleString() + " €",
@@ -752,6 +754,67 @@ export default function PanelAdmin() {
             </div>
           </div>
         )}
+
+        {tab === "ventas" && (
+          <div style={{ backgroundColor: "#170808", borderRadius: "16px", border: "1px solid #7f1d1d", overflow: "hidden", marginTop: "1.5rem" }}>
+            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #7f1d1d", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem", color: "#ef4444" }}>
+                Ventas Canceladas ({ventasCanceladas.length})
+              </h3>
+              <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
+                Canceladas
+              </span>
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#450a0a" }}>
+                    {["ID", "Cliente", "Empleado", "Vehículo", "Cant.", "Total", "Fecha", "Estado", "Acción"].map(h => (
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {ventasCanceladas.map((v, i) => (
+                    <tr key={v.id} style={{ borderTop: "1px solid #7f1d1d", backgroundColor: i % 2 === 0 ? "rgba(127,29,29,0.18)" : "rgba(127,29,29,0.1)" }}>
+                      <td style={{ padding: "1rem 1.5rem", color: "#fca5a5", fontSize: "0.85rem" }}>#{v.id}</td>
+                      <td style={{ padding: "1rem 1.5rem" }}>{v.cliente?.nombre}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
+                      <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
+                      <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#fca5a5", fontWeight: "800" }}>
+                        {v.total?.toLocaleString()} €
+                      </td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>
+                        {v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}
+                      </td>
+                      <td style={{ padding: "1rem 1.5rem" }}>
+                        <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>
+                          Cancelada
+                        </span>
+                      </td>
+                      <td style={actionCellStyle}>
+                        <div style={actionButtonsStyle}>
+                          <button
+                            onClick={() => setVentaInfo(v)}
+                            title="Información de venta"
+                            style={buttonActionStyle("info")}
+                          >
+                            i
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </main>
 
       {editingItem && (
@@ -1062,7 +1125,7 @@ export default function PanelAdmin() {
             {detalleVentaLinea("Cantidad", `${ventaInfo.cantidad} unidad(es)`)}
             {detalleVentaLinea("Total", `${ventaInfo.total?.toLocaleString()} €`)}
             {detalleVentaLinea("Fecha", ventaInfo.fecha ? new Date(ventaInfo.fecha).toLocaleDateString("es-ES") : "-")}
-            {detalleVentaLinea("Estado", ventaInfo.estado === "realizada" ? "Realizada" : "Pendiente")}
+            {detalleVentaLinea("Estado", ventaInfo.estado === "realizada" ? "Realizada" : ventaInfo.estado === "cancelada" ? "Cancelada" : "Pendiente")}
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.2rem" }}>
               <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>

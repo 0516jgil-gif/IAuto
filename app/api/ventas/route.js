@@ -132,10 +132,7 @@ export async function DELETE(req) {
       await sendSaleCancellationEmail(venta.cliente.email, venta);
     }
 
-    await prisma.$transaction([
-      prisma.venta.delete({
-        where: { id },
-      }),
+    const [, ventaCancelada] = await prisma.$transaction([
       prisma.vehiculo.update({
         where: { id: venta.vehiculoId },
         data: {
@@ -144,9 +141,14 @@ export async function DELETE(req) {
           },
         },
       }),
+      prisma.venta.update({
+        where: { id },
+        data: { estado: "cancelada" },
+        include: { cliente: true, empleado: true, vehiculo: true },
+      }),
     ]);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, venta: ventaCancelada });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: err.message }, { status: 500 });
