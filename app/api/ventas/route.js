@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { sendSaleConfirmationEmail } from "@/lib/email";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -62,6 +63,38 @@ export async function POST(req) {
   ]);
 
   return NextResponse.json(venta);
+}
+
+export async function PATCH(req) {
+  try {
+    const body = await req.json();
+    const id = Number(body.id);
+    const accion = body.accion || "procesar";
+
+    if (!id || accion !== "procesar") {
+      return NextResponse.json({ error: "Solicitud de venta no válida" }, { status: 400 });
+    }
+
+    const venta = await prisma.venta.findUnique({
+      where: { id },
+      include: { cliente: true, empleado: true, vehiculo: true },
+    });
+
+    if (!venta) {
+      return NextResponse.json({ error: "Venta no encontrada" }, { status: 404 });
+    }
+
+    if (!venta.cliente?.email) {
+      return NextResponse.json({ error: "El cliente no tiene email asociado" }, { status: 400 });
+    }
+
+    await sendSaleConfirmationEmail(venta.cliente.email, venta);
+
+    return NextResponse.json({ ok: true, venta });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: err.message || "No se pudo procesar la venta" }, { status: 500 });
+  }
 }
 
 export async function DELETE(req) {

@@ -260,11 +260,27 @@ export default function PanelAdmin() {
     }
   };
 
-  const handleProcesarVenta = (venta) => {
+  const handleProcesarVenta = async (venta) => {
     const confirmar = window.confirm(`¿Quieres procesar la venta #${venta.id}?`);
 
-    if (confirmar) {
-      alert("La venta se ha procesado correctamente.");
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch("/api/ventas", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: venta.id, accion: "procesar" }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "No se pudo procesar la venta.");
+        return;
+      }
+
+      alert("La venta se ha procesado correctamente y se ha enviado el email al cliente.");
+    } catch (error) {
+      alert("Error al procesar la venta.");
     }
   };
 
@@ -984,7 +1000,7 @@ export default function PanelAdmin() {
               <button onClick={() => setVentaInfo(null)} style={{ background: "none", border: "1px solid #444", color: "#aaa", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}>
                 Cerrar
               </button>
-              <button onClick={() => { setVentaInfo(null); handleProcesarVenta(ventaInfo); }} style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", color: "#10b981", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "800" }}>
+              <button onClick={() => { const venta = ventaInfo; setVentaInfo(null); handleProcesarVenta(venta); }} style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", color: "#10b981", padding: "0.7rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "800" }}>
                 Procesar
               </button>
             </div>
