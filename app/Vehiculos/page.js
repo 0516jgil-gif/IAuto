@@ -8,6 +8,15 @@ export default function ListaVehiculos() {
   const [isLogged, setIsLogged] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [compraPendiente, setCompraPendiente] = useState(null);
+  const [compraOpciones, setCompraOpciones] = useState({
+    subvencion: true,
+    seguro: "todo-riesgo",
+    financiacion: false,
+    garantia: true,
+    entrega: "concesionario",
+  });
+  const [comprando, setComprando] = useState(false);
 
   const router = useRouter();
 
@@ -48,16 +57,24 @@ export default function ListaVehiculos() {
     return Number(localStorage.getItem("userId"));
   };
 
-  const handleComprar = async (vehiculoId) => {
+  const handleComprar = (vehiculo) => {
     const clienteId = validarCliente("comprar este vehículo");
     if (!clienteId) return;
+    setCompraPendiente(vehiculo);
+  };
+
+  const confirmarCompra = async () => {
+    if (!compraPendiente) return;
+    const clienteId = Number(localStorage.getItem("userId"));
+    setComprando(true);
 
     const res = await fetch("/api/ventas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clienteId, vehiculoId, cantidad: 1 }),
+      body: JSON.stringify({ clienteId, vehiculoId: compraPendiente.id, cantidad: 1 }),
     });
     const data = await res.json();
+    setComprando(false);
 
     if (!res.ok) {
       alert(data.error || "No se pudo registrar la compra.");
@@ -65,8 +82,9 @@ export default function ListaVehiculos() {
     }
 
     setVehiculos((actuales) =>
-      actuales.map((v) => v.id === vehiculoId ? { ...v, stock: Math.max(v.stock - 1, 0) } : v)
+      actuales.map((v) => v.id === compraPendiente.id ? { ...v, stock: Math.max(v.stock - 1, 0) } : v)
     );
+    setCompraPendiente(null);
     alert("Compra registrada correctamente. Ya aparece en tu perfil.");
   };
 
@@ -92,6 +110,14 @@ export default function ListaVehiculos() {
   const filtrados = vehiculos.filter(v =>
     `${v.marca} ${v.modelo}`.toLowerCase().includes(busqueda.toLowerCase())
   );
+
+  const seguroPrecio = compraOpciones.seguro === "todo-riesgo" ? 690 : compraOpciones.seguro === "terceros" ? 290 : 0;
+  const extrasCompra =
+    seguroPrecio +
+    (compraOpciones.garantia ? 450 : 0) +
+    (compraOpciones.entrega === "domicilio" ? 180 : 0);
+  const descuentoSubvencion = compraOpciones.subvencion ? 1200 : 0;
+  const totalEstimado = Math.max((compraPendiente?.precio || 0) + extrasCompra - descuentoSubvencion, 0);
 
   return (
     <div style={{ backgroundColor: "#000", color: "#fff", minHeight: "100vh", fontFamily: "sans-serif" }}>
@@ -200,7 +226,7 @@ export default function ListaVehiculos() {
                 </p>
                 <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", gap: "8px" }}>
                   <button
-                    onClick={() => handleComprar(v.id)}
+                    onClick={() => handleComprar(v)}
                     disabled={v.stock === 0}
                     style={{
                       flex: 2, padding: "10px", backgroundColor: v.stock > 0 ? "#fff" : "#222",
@@ -235,6 +261,73 @@ export default function ListaVehiculos() {
           </div>
         )}
       </main>
+
+      {compraPendiente && (
+        <div style={{
+          position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "1rem", zIndex: 500
+        }}>
+          <div style={{
+            width: "min(520px, 100%)", backgroundColor: "#0d0d0d",
+            border: "1px solid #222", borderRadius: "18px", padding: "1.5rem",
+            boxShadow: "0 20px 80px rgba(0,0,0,0.55)"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", marginBottom: "1rem" }}>
+              <div>
+                <p style={{ color: "#3b82f6", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>Resumen de compra</p>
+                <h3 style={{ margin: 0, fontSize: "1.35rem" }}>{compraPendiente.marca} {compraPendiente.modelo}</h3>
+              </div>
+              <button onClick={() => setCompraPendiente(null)} style={{ background: "none", border: "1px solid #333", color: "#aaa", borderRadius: "8px", width: "34px", height: "34px", cursor: "pointer" }}>x</button>
+            </div>
+
+            <label style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.8rem 0", borderTop: "1px solid #1a1a1a", color: "#ddd" }}>
+              <span>Solicitar subvención estimada</span>
+              <input type="checkbox" checked={compraOpciones.subvencion} onChange={(e) => setCompraOpciones({ ...compraOpciones, subvencion: e.target.checked })} />
+            </label>
+
+            <div style={{ padding: "0.8rem 0", borderTop: "1px solid #1a1a1a" }}>
+              <p style={{ color: "#777", margin: "0 0 0.5rem", fontSize: "0.8rem", textTransform: "uppercase" }}>Seguro</p>
+              <select value={compraOpciones.seguro} onChange={(e) => setCompraOpciones({ ...compraOpciones, seguro: e.target.value })} style={{ width: "100%", backgroundColor: "#111", color: "#fff", border: "1px solid #222", borderRadius: "10px", padding: "10px" }}>
+                <option value="todo-riesgo">Todo riesgo - 690 EUR/año</option>
+                <option value="terceros">Terceros ampliado - 290 EUR/año</option>
+                <option value="sin-seguro">Lo contrataré por mi cuenta</option>
+              </select>
+            </div>
+
+            <label style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.8rem 0", borderTop: "1px solid #1a1a1a", color: "#ddd" }}>
+              <span>Financiación con estudio previo</span>
+              <input type="checkbox" checked={compraOpciones.financiacion} onChange={(e) => setCompraOpciones({ ...compraOpciones, financiacion: e.target.checked })} />
+            </label>
+            <label style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.8rem 0", borderTop: "1px solid #1a1a1a", color: "#ddd" }}>
+              <span>Garantía ampliada 24 meses (+450 EUR)</span>
+              <input type="checkbox" checked={compraOpciones.garantia} onChange={(e) => setCompraOpciones({ ...compraOpciones, garantia: e.target.checked })} />
+            </label>
+
+            <div style={{ padding: "0.8rem 0", borderTop: "1px solid #1a1a1a" }}>
+              <p style={{ color: "#777", margin: "0 0 0.5rem", fontSize: "0.8rem", textTransform: "uppercase" }}>Entrega</p>
+              <select value={compraOpciones.entrega} onChange={(e) => setCompraOpciones({ ...compraOpciones, entrega: e.target.value })} style={{ width: "100%", backgroundColor: "#111", color: "#fff", border: "1px solid #222", borderRadius: "10px", padding: "10px" }}>
+                <option value="concesionario">Recogida en concesionario</option>
+                <option value="domicilio">Entrega a domicilio (+180 EUR)</option>
+              </select>
+            </div>
+
+            <div style={{ backgroundColor: "#111", border: "1px solid #222", borderRadius: "12px", padding: "1rem", margin: "0.75rem 0 1rem" }}>
+              <p style={{ display: "flex", justifyContent: "space-between", margin: "0 0 0.45rem", color: "#aaa" }}><span>Vehículo</span><strong>{compraPendiente.precio?.toLocaleString()} EUR</strong></p>
+              <p style={{ display: "flex", justifyContent: "space-between", margin: "0 0 0.45rem", color: "#aaa" }}><span>Extras y seguro</span><strong>{extrasCompra.toLocaleString()} EUR</strong></p>
+              <p style={{ display: "flex", justifyContent: "space-between", margin: "0 0 0.75rem", color: "#10b981" }}><span>Subvención estimada</span><strong>-{descuentoSubvencion.toLocaleString()} EUR</strong></p>
+              <p style={{ display: "flex", justifyContent: "space-between", margin: 0, color: "#fff", fontSize: "1.1rem" }}><span>Total estimado</span><strong>{totalEstimado.toLocaleString()} EUR</strong></p>
+            </div>
+
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button onClick={() => setCompraPendiente(null)} style={{ flex: 1, padding: "12px", backgroundColor: "#111", color: "#aaa", border: "1px solid #222", borderRadius: "12px", cursor: "pointer", fontWeight: "700" }}>Cancelar</button>
+              <button onClick={confirmarCompra} disabled={comprando} style={{ flex: 2, padding: "12px", backgroundColor: "#fff", color: "#000", border: "none", borderRadius: "12px", cursor: comprando ? "not-allowed" : "pointer", fontWeight: "800" }}>
+                {comprando ? "Registrando..." : "Confirmar compra"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
