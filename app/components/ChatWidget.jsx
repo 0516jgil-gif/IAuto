@@ -62,8 +62,8 @@ export default function ChatWidget() {
               <div style={{
                 width: "36px", height: "36px", borderRadius: "50%",
                 backgroundColor: "#3b82f6", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "1.1rem",
-              }}>🚗</div>
+                justifyContent: "center", fontSize: "0.75rem", fontWeight: "800", color: "#fff",
+              }}>IA</div>
               <div>
                 <p style={{ margin: 0, color: "#fff", fontWeight: "700", fontSize: "0.9rem" }}>Asistente IAUTO</p>
                 <p style={{ margin: 0, color: "#10b981", fontSize: "0.72rem" }}>● En línea</p>
@@ -152,7 +152,7 @@ export default function ChatWidget() {
         onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(59,130,246,0.5)"; }}
         title="Asistente IAUTO"
       >
-        {abierto ? "✕" : "🚗"}
+        {abierto ? "✕" : <span style={{ fontWeight: "800", fontSize: "0.9rem", letterSpacing: "1px" }}>IA</span>}
       </button>
     </>
   );
