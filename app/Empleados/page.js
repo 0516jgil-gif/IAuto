@@ -278,6 +278,10 @@ export default function PanelAdmin() {
         return;
       }
 
+      setData(prev => ({
+        ...prev,
+        ventas: prev.ventas.filter(v => v.id !== venta.id),
+      }));
       alert("La venta se ha procesado correctamente y se ha enviado el email al cliente.");
     } catch (error) {
       alert("Error al procesar la venta.");

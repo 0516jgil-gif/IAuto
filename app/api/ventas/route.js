@@ -89,6 +89,9 @@ export async function PATCH(req) {
     }
 
     await sendSaleConfirmationEmail(venta.cliente.email, venta);
+    await prisma.venta.delete({
+      where: { id },
+    });
 
     return NextResponse.json({ ok: true, venta });
   } catch (err) {
