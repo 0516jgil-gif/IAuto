@@ -256,7 +256,7 @@ export default function AuthPage() {
             </p>
             <form onSubmit={handleVerify}>
               <input type="text" placeholder="Introduce el código" required maxLength={6}
-                style={{ ...inputStyle, textAlign: "center", fontSize: "1.8rem", letterSpacing: "10px", fontWeight: "700" }}
+                style={{ ...inputStyle, textAlign: "center", fontSize: "1.25rem", letterSpacing: "5px", fontWeight: "700" }}
                 onChange={(e) => setVerificationCode(e.target.value)} />
               <button type="submit" disabled={loading} style={{ ...btnStyle, opacity: loading ? 0.7 : 1 }}>
                 {loading ? "Verificando..." : "Confirmar código"}
@@ -301,7 +301,7 @@ export default function AuthPage() {
             </p>
             <form onSubmit={handleResetVerify}>
               <input type="text" placeholder="Código de 6 dígitos" required maxLength={6} value={resetCode}
-                style={{ ...inputStyle, textAlign: "center", fontSize: "1.8rem", letterSpacing: "10px", fontWeight: "700" }}
+                style={{ ...inputStyle, textAlign: "center", fontSize: "1.25rem", letterSpacing: "5px", fontWeight: "700" }}
                 onChange={(e) => setResetCode(e.target.value)} />
               <button type="submit" disabled={loading || resetCode.length < 6}
                 style={{ ...btnStyle, opacity: (loading || resetCode.length < 6) ? 0.5 : 1 }}>
