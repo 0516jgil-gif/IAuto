@@ -532,7 +532,7 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{v.id}</td>
                       <td style={{ padding: "1rem 1.5rem", fontWeight: "600" }}>{v.marca}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.modelo}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "600" }}>{v.precio?.toLocaleString()} €</td>
+                      <td className="iauto-currency-cell" style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "600" }}>{v.precio?.toLocaleString()} €</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
                         <span style={{ backgroundColor: v.stock > 0 ? "#064e3b" : "#450a0a", color: v.stock > 0 ? "#10b981" : "#ef4444", padding: "3px 10px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "600" }}>
                           {v.stock > 0 ? v.stock + " uds." : "Agotado"}
@@ -574,7 +574,7 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
                       <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#f59e0b", fontWeight: "600" }}>{v.total?.toLocaleString()} €</td>
+                      <td className="iauto-currency-cell" style={{ padding: "1rem 1.5rem", color: "#f59e0b", fontWeight: "600" }}>{v.total?.toLocaleString()} €</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>{v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}</td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
@@ -614,7 +614,7 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
                       <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "800" }}>{v.total?.toLocaleString()} €</td>
+                      <td className="iauto-currency-cell" style={{ padding: "1rem 1.5rem", color: "#10b981", fontWeight: "800" }}>{v.total?.toLocaleString()} €</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>{v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
                         <span style={{ color: "#10b981", border: "1px solid #10b981", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>Realizada</span>
@@ -655,7 +655,7 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{v.empleado?.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>{v.vehiculo?.marca} {v.vehiculo?.modelo}</td>
                       <td style={{ padding: "1rem 1.5rem", textAlign: "center" }}>{v.cantidad}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#fca5a5", fontWeight: "800" }}>{v.total?.toLocaleString()} €</td>
+                      <td className="iauto-currency-cell" style={{ padding: "1rem 1.5rem", color: "#fca5a5", fontWeight: "800" }}>{v.total?.toLocaleString()} €</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#9ca3af", fontSize: "0.85rem" }}>{v.fecha ? new Date(v.fecha).toLocaleDateString("es-ES") : "-"}</td>
                       <td style={{ padding: "1rem 1.5rem" }}>
                         <span style={{ color: "#ef4444", border: "1px solid #ef4444", borderRadius: "999px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: "800" }}>Cancelada</span>

@@ -39,6 +39,11 @@ img {
   font-size: clamp(1.55rem, 2.35vw, 2rem) !important;
 }
 
+.iauto-currency-cell {
+  white-space: nowrap;
+  min-width: max-content;
+}
+
 @media (max-width: 1024px) {
   header {
     padding-left: 1.5rem !important;
