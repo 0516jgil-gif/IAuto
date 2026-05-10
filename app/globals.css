@@ -33,6 +33,12 @@ img {
   max-width: 100%;
 }
 
+.iauto-stat-value {
+  white-space: nowrap;
+  line-height: 1.15;
+  font-size: clamp(1.55rem, 2.35vw, 2rem) !important;
+}
+
 @media (max-width: 1024px) {
   header {
     padding-left: 1.5rem !important;
@@ -53,14 +59,21 @@ img {
   header {
     gap: 1rem !important;
     flex-wrap: wrap !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
 
   header nav,
   header > div:last-child {
     width: 100%;
-    justify-content: flex-start !important;
+    justify-content: center !important;
     flex-wrap: wrap !important;
     gap: 0.75rem !important;
+  }
+
+  header > div:first-child {
+    justify-content: center !important;
+    text-align: center !important;
   }
 
   header nav a {

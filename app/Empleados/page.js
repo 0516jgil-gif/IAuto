@@ -457,7 +457,7 @@ export default function PanelAdmin() {
               <div style={{ position: "absolute", top: "-12px", right: "-8px", fontSize: "4.6rem", opacity: 0.14, color, fontWeight: "900", lineHeight: 1 }}>{icon}</div>
               <div style={{ width: "34px", height: "34px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color, border: `1px solid ${color}`, backgroundColor: `${color}1a`, fontSize: "1.1rem", fontWeight: "900", marginBottom: "0.85rem" }}>{icon}</div>
               <p style={{ color: "#666", fontSize: "0.8rem", marginBottom: "0.3rem", textTransform: "uppercase", letterSpacing: "1px" }}>{label}</p>
-              <p style={{ fontSize: "2rem", fontWeight: "800", color, margin: 0 }}>{value}</p>
+              <p className="iauto-stat-value" style={{ fontSize: "2rem", fontWeight: "800", color, margin: 0 }}>{value}</p>
             </div>
           ))}
         </div>
