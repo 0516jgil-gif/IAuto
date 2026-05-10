@@ -111,7 +111,7 @@ export default function Perfil() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+        <div className="iauto-profile-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
           <section style={cardStyle}>
             <h3 style={{ color: "#3b82f6", marginTop: 0, fontSize: "1rem" }}>Mis Datos</h3>
             <div style={{ marginBottom: "1rem" }}>
@@ -126,7 +126,7 @@ export default function Perfil() {
               <p style={{ color: "#444", fontSize: "0.9rem", lineHeight: "1.6" }}>No tienes coches guardados todavia.</p>
             ) : (
               favoritos.map((favorito) => (
-                <div key={favorito.id} style={itemStyle}>
+                <div key={favorito.id} className="iauto-profile-item" style={itemStyle}>
                   <div>
                     <p style={{ margin: "0 0 0.2rem", fontWeight: "700" }}>{nombreVehiculo(favorito.vehiculo)}</p>
                     <p style={{ margin: 0, color: "#3b82f6", fontSize: "0.9rem" }}>{favorito.vehiculo?.precio?.toLocaleString()} EUR</p>
@@ -159,7 +159,7 @@ export default function Perfil() {
             </>
           ) : (
             ventas.map((venta) => (
-              <div key={venta.id} style={itemStyle}>
+              <div key={venta.id} className="iauto-profile-item" style={itemStyle}>
                 <div>
                   <p style={{ margin: "0 0 0.2rem", fontWeight: "700" }}>{nombreVehiculo(venta.vehiculo)}</p>
                   <p style={{ margin: 0, color: "#555", fontSize: "0.85rem" }}>
@@ -199,8 +199,8 @@ export default function Perfil() {
       </main>
 
       {ventaInfo && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
-          <div style={{ width: "100%", maxWidth: "480px", backgroundColor: "#0d0d0d", border: "1px solid #222", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
+        <div className="iauto-modal" style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
+          <div className="iauto-modal-panel" style={{ width: "100%", maxWidth: "480px", backgroundColor: "#0d0d0d", border: "1px solid #222", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", marginBottom: "1rem" }}>
               <div>
                 <p style={{ color: "#3b82f6", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>Información de compra</p>

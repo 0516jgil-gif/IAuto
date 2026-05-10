@@ -24,3 +24,163 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  header {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  main {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  .iauto-admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  header nav,
+  header > div:last-child {
+    width: 100%;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+  }
+
+  header nav a {
+    margin-left: 0 !important;
+  }
+
+  section {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  table {
+    min-width: 760px;
+  }
+
+  .iauto-hero {
+    min-height: 680px !important;
+    height: auto !important;
+    padding-top: 8rem !important;
+    padding-bottom: 4rem !important;
+  }
+
+  .iauto-list-toolbar {
+    align-items: stretch !important;
+  }
+
+  .iauto-list-toolbar input {
+    width: 100% !important;
+  }
+
+  .iauto-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .iauto-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .iauto-detail-image {
+    height: clamp(230px, 55vw, 340px) !important;
+  }
+
+  .iauto-actions {
+    flex-direction: column !important;
+  }
+
+  .iauto-actions > * {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .iauto-profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .iauto-profile-item {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .iauto-auth-card {
+    padding: 1.5rem !important;
+    border-radius: 16px !important;
+  }
+
+  .iauto-admin-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .iauto-admin-tabs {
+    overflow-x: auto !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .iauto-admin-tabs button {
+    flex: 0 0 auto !important;
+  }
+
+  .iauto-modal {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+  }
+
+  .iauto-chat-window {
+    inset: auto 12px 82px 12px !important;
+    width: auto !important;
+    height: min(560px, calc(100vh - 110px)) !important;
+  }
+
+  .iauto-chat-toggle {
+    right: 16px !important;
+    bottom: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 0.9rem 1rem !important;
+  }
+
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 10vw, 2.4rem) !important;
+  }
+
+  h2 {
+    font-size: clamp(1.35rem, 8vw, 2rem) !important;
+  }
+
+  .iauto-hero {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .iauto-modal-panel {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+}

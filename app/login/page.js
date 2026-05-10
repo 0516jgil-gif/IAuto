@@ -177,7 +177,7 @@ export default function AuthPage() {
       color: "#fff", fontFamily: "sans-serif",
       backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.15) 0%, transparent 60%)"
     }}>
-      <div style={{
+      <div className="iauto-auth-card" style={{
         backgroundColor: "#0d0d0d", padding: "2.5rem",
         borderRadius: "20px", border: "1px solid #1f1f1f",
         width: "90%", maxWidth: "420px",

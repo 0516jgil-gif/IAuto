@@ -232,12 +232,12 @@ export default function VehiculoDetalle() {
           <span style={{ color: "#aaa" }}>{vehiculo.marca} {vehiculo.modelo}</span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2.5rem" }}>
+        <div className="iauto-detail-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2.5rem" }}>
 
           {/* ── Columna izquierda: galería de imágenes ── */}
           <div>
             {/* Imagen principal */}
-            <div style={{
+            <div className="iauto-detail-image" style={{
               height: "360px", borderRadius: "20px",
               border: "1px solid #1a1a1a", backgroundColor: "#111",
               overflow: "hidden", marginBottom: "0.75rem",
@@ -357,7 +357,7 @@ export default function VehiculoDetalle() {
             )}
 
             {/* Botones de acción */}
-            <div style={{ display: "flex", gap: "0.75rem" }}>
+            <div className="iauto-actions" style={{ display: "flex", gap: "0.75rem" }}>
               <button
                 onClick={handleComprar}
                 disabled={!disponible}
@@ -400,12 +400,12 @@ export default function VehiculoDetalle() {
       </main>
 
       {mostrarCompra && vehiculo && (
-        <div style={{
+        <div className="iauto-modal" style={{
           position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)",
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "1rem", zIndex: 500
         }}>
-          <div style={{
+          <div className="iauto-modal-panel" style={{
             width: "min(520px, 100%)", backgroundColor: "#0d0d0d",
             border: "1px solid #222", borderRadius: "18px", padding: "1.5rem",
             boxShadow: "0 20px 80px rgba(0,0,0,0.55)"
@@ -456,7 +456,7 @@ export default function VehiculoDetalle() {
               <p style={{ display: "flex", justifyContent: "space-between", margin: 0, color: "#fff", fontSize: "1.1rem" }}><span>Total estimado</span><strong>{totalEstimado.toLocaleString()} EUR</strong></p>
             </div>
 
-            <div style={{ display: "flex", gap: "0.75rem" }}>
+            <div className="iauto-actions" style={{ display: "flex", gap: "0.75rem" }}>
               <button onClick={() => setMostrarCompra(false)} style={{ flex: 1, padding: "12px", backgroundColor: "#111", color: "#aaa", border: "1px solid #222", borderRadius: "12px", cursor: "pointer", fontWeight: "700" }}>Cancelar</button>
               <button onClick={confirmarCompra} disabled={comprando} style={{ flex: 2, padding: "12px", backgroundColor: "#fff", color: "#000", border: "none", borderRadius: "12px", cursor: comprando ? "not-allowed" : "pointer", fontWeight: "800" }}>
                 {comprando ? "Registrando..." : "Confirmar compra"}

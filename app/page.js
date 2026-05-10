@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function InicioIAuto() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,8 +26,10 @@ export default function InicioIAuto() {
       ahora - parseInt(lastActivity) < 30 * 60 * 1000
     ) {
       if (rol && rol.toLowerCase() === "admin" && adminName) {
-        setUsuario({ nombre: adminName });
-        setIsAdmin(true);
+        Promise.resolve().then(() => {
+          setUsuario({ nombre: adminName });
+          setIsAdmin(true);
+        });
       } else {
         fetch("/api/Clientes")
           .then((r) => r.json())
@@ -98,17 +101,17 @@ export default function InicioIAuto() {
             alignItems: "center",
           }}
         >
-          <a href="/" style={navLink}>
+          <Link href="/" style={navLink}>
             Inicio
-          </a>
+          </Link>
 
-          <a href="/Vehiculos" style={navLink}>
+          <Link href="/Vehiculos" style={navLink}>
             Vehículos
-          </a>
+          </Link>
 
           {/* SOLO ADMIN */}
           {isAdmin && (
-            <a
+            <Link
               href="/Empleados"
               style={{
                 ...navLink,
@@ -116,11 +119,11 @@ export default function InicioIAuto() {
               }}
             >
               🔒 Admin
-            </a>
+            </Link>
           )}
 
           {/* BOTÓN CUENTA */}
-          <a
+          <Link
             href={
               usuario
                 ? isAdmin
@@ -142,12 +145,13 @@ export default function InicioIAuto() {
             {usuario
               ? `Hola, ${(usuario.nombre || "Usuario").split(" ")[0]}`
               : "Mi Cuenta"}
-          </a>
+          </Link>
         </nav>
       </header>
 
       {/* HERO */}
       <section
+        className="iauto-hero"
         style={{
           height: "100vh",
           display: "flex",

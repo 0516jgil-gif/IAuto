@@ -77,7 +77,7 @@ export default function PerfilCliente() {
         {/* Sección 1: Datos Personales */}
         <section style={sectionStyle}>
           <h3 style={{ marginTop: 0, color: "#3b82f6" }}>Mis Datos</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <div className="iauto-profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
               <label style={{ fontSize: "0.8rem", color: "#666" }}>NOMBRE</label>
               <p style={{ margin: "0.2rem 0" }}>{cliente?.nombre}</p>
@@ -108,7 +108,7 @@ export default function PerfilCliente() {
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {cliente?.likes?.length > 0 ? (
               cliente.likes.map((carId, index) => (
-                <div key={index} style={carCardStyle}>
+                <div key={index} className="iauto-profile-item" style={carCardStyle}>
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                     <span style={{ fontSize: "1.5rem" }}>🚗</span>
                     <span>{carId}</span> {/* Aquí iría el nombre del modelo */}

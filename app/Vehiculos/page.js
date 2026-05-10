@@ -160,7 +160,7 @@ export default function ListaVehiculos() {
 
       <main style={{ padding: "3rem 4rem" }}>
         {/* Título + buscador */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem", flexWrap: "wrap", gap: "1rem" }}>
+        <div className="iauto-list-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <h2 style={{ margin: 0, fontSize: "1.8rem" }}>Catálogo de Vehículos</h2>
             <p style={{ color: "#555", margin: "0.3rem 0 0", fontSize: "0.9rem" }}>{filtrados.length} vehículos disponibles</p>
@@ -178,7 +178,7 @@ export default function ListaVehiculos() {
         </div>
 
         {/* Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.5rem" }}>
+        <div className="iauto-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.5rem" }}>
           {filtrados.map(v => (
             <div
               key={v.id}
@@ -263,12 +263,12 @@ export default function ListaVehiculos() {
       </main>
 
       {compraPendiente && (
-        <div style={{
+        <div className="iauto-modal" style={{
           position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)",
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "1rem", zIndex: 500
         }}>
-          <div style={{
+          <div className="iauto-modal-panel" style={{
             width: "min(520px, 100%)", backgroundColor: "#0d0d0d",
             border: "1px solid #222", borderRadius: "18px", padding: "1.5rem",
             boxShadow: "0 20px 80px rgba(0,0,0,0.55)"
@@ -319,7 +319,7 @@ export default function ListaVehiculos() {
               <p style={{ display: "flex", justifyContent: "space-between", margin: 0, color: "#fff", fontSize: "1.1rem" }}><span>Total estimado</span><strong>{totalEstimado.toLocaleString()} EUR</strong></p>
             </div>
 
-            <div style={{ display: "flex", gap: "0.75rem" }}>
+            <div className="iauto-actions" style={{ display: "flex", gap: "0.75rem" }}>
               <button onClick={() => setCompraPendiente(null)} style={{ flex: 1, padding: "12px", backgroundColor: "#111", color: "#aaa", border: "1px solid #222", borderRadius: "12px", cursor: "pointer", fontWeight: "700" }}>Cancelar</button>
               <button onClick={confirmarCompra} disabled={comprando} style={{ flex: 2, padding: "12px", backgroundColor: "#fff", color: "#000", border: "none", borderRadius: "12px", cursor: comprando ? "not-allowed" : "pointer", fontWeight: "800" }}>
                 {comprando ? "Registrando..." : "Confirmar compra"}

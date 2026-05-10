@@ -44,7 +44,7 @@ export default function ChatWidget() {
     <>
       {/* Ventana de chat */}
       {abierto && (
-        <div style={{
+        <div className="iauto-chat-window" style={{
           position: "fixed", bottom: "90px", right: "24px",
           width: "360px", height: "500px",
           backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a",
@@ -138,6 +138,7 @@ export default function ChatWidget() {
 
       {/* Botón flotante */}
       <button
+        className="iauto-chat-toggle"
         onClick={() => setAbierto(prev => !prev)}
         style={{
           position: "fixed", bottom: "24px", right: "24px",

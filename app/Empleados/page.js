@@ -451,7 +451,7 @@ export default function PanelAdmin() {
         <h1 style={{ fontSize: "1.8rem", fontWeight: "700", marginBottom: "0.3rem" }}>Panel de Administración</h1>
         <p style={{ color: "#555", marginBottom: "2.5rem", fontSize: "0.9rem" }}>Gestión completa de la plataforma IAuto</p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
+        <div className="iauto-admin-stats" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
           {statCards.map(({ label, value, icon, color }) => (
             <div key={label} style={{ backgroundColor: "#111", borderRadius: "16px", padding: "1.35rem", border: "1px solid #1f1f1f", position: "relative", overflow: "hidden", minHeight: "142px" }}>
               <div style={{ position: "absolute", top: "-12px", right: "-8px", fontSize: "4.6rem", opacity: 0.14, color, fontWeight: "900", lineHeight: 1 }}>{icon}</div>
@@ -462,7 +462,7 @@ export default function PanelAdmin() {
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        <div className="iauto-admin-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
           {["clientes", "vehiculos", "ventas"].map(t => (
             <button key={t} onClick={() => setTab(t)} style={tabStyle(tab === t)}>
               {t === "clientes" ? "👥 Clientes" : t === "vehiculos" ? "🚗 Vehículos" : "💰 Ventas"}
@@ -676,9 +676,10 @@ export default function PanelAdmin() {
 
       {/* MODAL EDICIÓN */}
       {editingItem && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000, overflowY: "auto" }}>
+        <div className="iauto-modal" style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000, overflowY: "auto" }}>
           <form
             onSubmit={handleGuardarEdicion}
+            className="iauto-modal-panel"
             style={{ width: "100%", maxWidth: "500px", backgroundColor: "#0d0d0d", border: "1px solid #262626", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)", margin: "auto" }}
           >
             <h2 style={{ margin: "0 0 1rem", fontSize: "1.2rem" }}>
@@ -851,8 +852,8 @@ export default function PanelAdmin() {
 
       {/* MODAL BORRADO */}
       {deleteItem && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
-          <div style={{ width: "100%", maxWidth: "430px", backgroundColor: "#0d0d0d", border: "1px solid #7f1d1d", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
+        <div className="iauto-modal" style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
+          <div className="iauto-modal-panel" style={{ width: "100%", maxWidth: "430px", backgroundColor: "#0d0d0d", border: "1px solid #7f1d1d", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
             <h2 style={{ margin: "0 0 0.6rem", fontSize: "1.2rem" }}>Confirmar borrado</h2>
             <p style={{ color: "#aaa", lineHeight: 1.5, margin: "0 0 1rem" }}>
               ¿Seguro que quieres {deleteItem.type === "venta" ? "cancelar" : "borrar"} {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : "la venta"}?
@@ -872,8 +873,8 @@ export default function PanelAdmin() {
 
       {/* MODAL INFO VENTA */}
       {ventaInfo && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
-          <div style={{ width: "100%", maxWidth: "500px", backgroundColor: "#0d0d0d", border: "1px solid #2563eb", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
+        <div className="iauto-modal" style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.72)", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem", zIndex: 1000 }}>
+          <div className="iauto-modal-panel" style={{ width: "100%", maxWidth: "500px", backgroundColor: "#0d0d0d", border: "1px solid #2563eb", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", marginBottom: "1rem" }}>
               <div>
                 <p style={{ color: "#60a5fa", margin: "0 0 0.25rem", fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase" }}>Información de venta</p>
