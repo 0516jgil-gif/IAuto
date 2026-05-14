@@ -4,6 +4,10 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/lib/email";
 
+function isMissingTelefonoColumn(err) {
+  return String(err?.message || "").includes("Cliente.telefono");
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -20,15 +24,23 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(body.password, 10);
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const cliente = await prisma.cliente.create({
-      data: {
-        nombre: body.nombre.trim(),
-        email: body.email.trim(),
-        telefono: body.telefono.trim(),
-        password: hashedPassword,
-        verificationCode: code,
-      },
-    });
+    const data = {
+      nombre: body.nombre.trim(),
+      email: body.email.trim(),
+      telefono: body.telefono.trim(),
+      password: hashedPassword,
+      verificationCode: code,
+    };
+
+    let cliente;
+    try {
+      cliente = await prisma.cliente.create({ data });
+    } catch (err) {
+      if (!isMissingTelefonoColumn(err)) throw err;
+      const dataSinTelefono = { ...data };
+      delete dataSinTelefono.telefono;
+      cliente = await prisma.cliente.create({ data: dataSinTelefono });
+    }
 
     await sendVerificationEmail(body.email, code, body.nombre);
 
@@ -46,6 +58,13 @@ export async function GET() {
     });
     return NextResponse.json(clientes);
   } catch (err) {
+    if (isMissingTelefonoColumn(err)) {
+      const clientes = await prisma.cliente.findMany({
+        select: { id: true, nombre: true, email: true, ventas: true },
+      });
+      return NextResponse.json(clientes.map((cliente) => ({ ...cliente, telefono: "" })));
+    }
+
     console.error(err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -74,7 +93,16 @@ export async function PUT(req) {
       updateData.password = await bcrypt.hash(body.password, 10);
     }
 
-    const cliente = await prisma.cliente.update({ where: { id }, data: updateData });
+    let cliente;
+    try {
+      cliente = await prisma.cliente.update({ where: { id }, data: updateData });
+    } catch (err) {
+      if (!isMissingTelefonoColumn(err)) throw err;
+      const updateDataSinTelefono = { ...updateData };
+      delete updateDataSinTelefono.telefono;
+      cliente = await prisma.cliente.update({ where: { id }, data: updateDataSinTelefono });
+    }
+
     return NextResponse.json(cliente);
   } catch (err) {
     console.error(err);

@@ -15,6 +15,7 @@ export default function PanelAdmin() {
   const [clienteSearch, setClienteSearch] = useState("");
   const [vehiculoSearch, setVehiculoSearch] = useState("");
   const [ventaInfo, setVentaInfo] = useState(null);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     const rol = localStorage.getItem("userRol");
@@ -27,12 +28,32 @@ export default function PanelAdmin() {
 
     setAdminName(nombre || "Admin");
 
-    Promise.all([
-      fetch("/api/Clientes").then(r => r.json()),
-      fetch("/api/Vehiculos").then(r => r.json()),
-      fetch("/api/ventas").then(r => r.json()),
+    const cargarLista = async (url) => {
+      const res = await fetch(url);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.error || `No se pudo cargar ${url}`);
+      }
+
+      return Array.isArray(data) ? data : [];
+    };
+
+    Promise.allSettled([
+      cargarLista("/api/Clientes"),
+      cargarLista("/api/Vehiculos"),
+      cargarLista("/api/ventas"),
     ]).then(([clientes, vehiculos, ventas]) => {
-      setData({ clientes, vehiculos, ventas });
+      const errores = [clientes, vehiculos, ventas]
+        .filter((resultado) => resultado.status === "rejected")
+        .map((resultado) => resultado.reason?.message || "Error de carga");
+
+      setData({
+        clientes: clientes.status === "fulfilled" ? clientes.value : [],
+        vehiculos: vehiculos.status === "fulfilled" ? vehiculos.value : [],
+        ventas: ventas.status === "fulfilled" ? ventas.value : [],
+      });
+      setLoadError(errores.join(" | "));
       setLoading(false);
     });
   }, []);
@@ -450,6 +471,12 @@ export default function PanelAdmin() {
       <main style={{ padding: "2.5rem 3rem", maxWidth: "1200px", margin: "0 auto" }}>
         <h1 style={{ fontSize: "1.8rem", fontWeight: "700", marginBottom: "0.3rem" }}>Panel de Administración</h1>
         <p style={{ color: "#555", marginBottom: "2.5rem", fontSize: "0.9rem" }}>Gestión completa de la plataforma IAuto</p>
+
+        {loadError && (
+          <div style={{ backgroundColor: "#2a1608", border: "1px solid #f59e0b", color: "#fbbf24", borderRadius: "12px", padding: "0.9rem 1rem", marginBottom: "1.5rem", fontSize: "0.9rem", lineHeight: 1.5 }}>
+            Algunos datos no se han podido cargar: {loadError}
+          </div>
+        )}
 
         <div className="iauto-admin-stats" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
           {statCards.map(({ label, value, icon, color }) => (

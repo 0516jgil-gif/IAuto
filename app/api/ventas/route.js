@@ -3,6 +3,12 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendSaleCancellationEmail, sendSaleConfirmationEmail } from "@/lib/email";
 
+const ventaInclude = {
+  cliente: { select: { id: true, nombre: true, email: true } },
+  empleado: true,
+  vehiculo: true,
+};
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const clienteId = Number(searchParams.get("clienteId"));
@@ -13,7 +19,7 @@ export async function GET(req) {
       ...(clienteId ? { clienteId } : {}),
       ...(estado ? { estado } : clienteId ? { estado: "pendiente" } : {}),
     },
-    include: { cliente: true, empleado: true, vehiculo: true },
+    include: ventaInclude,
     orderBy: { fecha: "desc" },
   });
   return NextResponse.json(ventas);
@@ -58,7 +64,7 @@ export async function POST(req) {
         cantidad,
         total,
       },
-      include: { cliente: true, empleado: true, vehiculo: true },
+      include: ventaInclude,
     }),
     prisma.vehiculo.update({
       where: { id: vehiculoId },
@@ -81,7 +87,7 @@ export async function PATCH(req) {
 
     const venta = await prisma.venta.findUnique({
       where: { id },
-      include: { cliente: true, empleado: true, vehiculo: true },
+      include: ventaInclude,
     });
 
     if (!venta) {
@@ -100,7 +106,7 @@ export async function PATCH(req) {
     const ventaRealizada = await prisma.venta.update({
       where: { id },
       data: { estado: "realizada" },
-      include: { cliente: true, empleado: true, vehiculo: true },
+      include: ventaInclude,
     });
 
     return NextResponse.json({ ok: true, venta: ventaRealizada });
@@ -121,7 +127,7 @@ export async function DELETE(req) {
 
     const venta = await prisma.venta.findUnique({
       where: { id },
-      include: { cliente: true, empleado: true, vehiculo: true },
+      include: ventaInclude,
     });
 
     if (!venta) {
@@ -144,7 +150,7 @@ export async function DELETE(req) {
       prisma.venta.update({
         where: { id },
         data: { estado: "cancelada" },
-        include: { cliente: true, empleado: true, vehiculo: true },
+        include: ventaInclude,
       }),
     ]);
 
