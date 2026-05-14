@@ -491,7 +491,7 @@ export default function PanelAdmin() {
                       <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{c.id}</td>
                       <td style={{ padding: "1rem 1.5rem", fontWeight: "500" }}>{c.nombre}</td>
                       <td style={{ padding: "1rem 1.5rem", color: "#3b82f6" }}>{c.email}</td>
-                      <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{c.telefono}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#aaa" }}>{c.telefono || "No indicado"}</td>
                       <td style={actionCellStyle}>
                         <div style={actionButtonsStyle}>
                           <button onClick={() => handleEditarCliente(c)} title="Editar cliente" style={buttonActionStyle("edit")}>✎</button>

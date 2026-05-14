@@ -8,7 +8,7 @@ export default function AuthPage() {
   const [step, setStep] = useState(1);
   const [pendingEmail, setPendingEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [formData, setFormData] = useState({ nombre: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ nombre: "", email: "", telefono: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   // Reset password flow
@@ -211,8 +211,12 @@ export default function AuthPage() {
 
             <form onSubmit={handleSubmit}>
               {!isLogin && !isAdmin && (
-                <input placeholder="Nombre completo" required style={inputStyle}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
+                <>
+                  <input placeholder="Nombre completo" required style={inputStyle}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
+                  <input type="tel" placeholder="Teléfono" required style={inputStyle}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} />
+                </>
               )}
               <input type="email" placeholder={isAdmin ? "Email de empleado" : "Email"} required style={inputStyle}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })} />

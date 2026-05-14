@@ -118,6 +118,10 @@ export default function Perfil() {
               <p style={{ color: "#555", fontSize: "0.75rem", textTransform: "uppercase", marginBottom: "0.2rem" }}>Email</p>
               <p style={{ margin: 0 }}>{cliente?.email}</p>
             </div>
+            <div>
+              <p style={{ color: "#555", fontSize: "0.75rem", textTransform: "uppercase", marginBottom: "0.2rem" }}>Teléfono</p>
+              <p style={{ margin: 0 }}>{cliente?.telefono || "No indicado"}</p>
+            </div>
           </section>
 
           <section style={cardStyle}>

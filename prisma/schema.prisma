@@ -11,6 +11,7 @@ model Cliente {
   id               Int        @id @default(autoincrement())
   nombre           String
   email            String     @unique
+  telefono         String?
   password         String
   verificationCode String?
   ventas           Venta[]

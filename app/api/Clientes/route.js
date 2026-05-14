@@ -8,7 +8,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    if (!body.nombre || !body.email || !body.password) {
+    if (!body.nombre || !body.email || !body.telefono || !body.password) {
       return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
     }
 
@@ -22,8 +22,9 @@ export async function POST(req) {
 
     const cliente = await prisma.cliente.create({
       data: {
-        nombre: body.nombre,
-        email: body.email,
+        nombre: body.nombre.trim(),
+        email: body.email.trim(),
+        telefono: body.telefono.trim(),
         password: hashedPassword,
         verificationCode: code,
       },
@@ -31,7 +32,7 @@ export async function POST(req) {
 
     await sendVerificationEmail(body.email, code, body.nombre);
 
-    return NextResponse.json({ email: cliente.email, nombre: cliente.nombre, pendingVerification: true });
+    return NextResponse.json({ email: cliente.email, nombre: cliente.nombre, telefono: cliente.telefono, pendingVerification: true });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -41,7 +42,7 @@ export async function POST(req) {
 export async function GET() {
   try {
     const clientes = await prisma.cliente.findMany({
-      select: { id: true, nombre: true, email: true, ventas: true },
+      select: { id: true, nombre: true, email: true, telefono: true, ventas: true },
     });
     return NextResponse.json(clientes);
   } catch (err) {
@@ -60,11 +61,15 @@ export async function PUT(req) {
       return NextResponse.json({ error: "ID de cliente no válido" }, { status: 400 });
     }
 
-    if (!body.nombre || !body.email) {
+    if (!body.nombre || !body.email || !body.telefono) {
       return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
     }
 
-    const updateData = { nombre: body.nombre, email: body.email };
+    const updateData = {
+      nombre: body.nombre.trim(),
+      email: body.email.trim(),
+      telefono: body.telefono.trim(),
+    };
     if (body.password) {
       updateData.password = await bcrypt.hash(body.password, 10);
     }
