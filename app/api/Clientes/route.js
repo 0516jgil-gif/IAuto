@@ -8,6 +8,10 @@ function isMissingTelefonoColumn(err) {
   return String(err?.message || "").includes("Cliente.telefono");
 }
 
+async function ensureTelefonoColumn() {
+  await prisma.$executeRawUnsafe('ALTER TABLE "Cliente" ADD COLUMN IF NOT EXISTS "telefono" TEXT');
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -37,9 +41,8 @@ export async function POST(req) {
       cliente = await prisma.cliente.create({ data });
     } catch (err) {
       if (!isMissingTelefonoColumn(err)) throw err;
-      const dataSinTelefono = { ...data };
-      delete dataSinTelefono.telefono;
-      cliente = await prisma.cliente.create({ data: dataSinTelefono });
+      await ensureTelefonoColumn();
+      cliente = await prisma.cliente.create({ data });
     }
 
     await sendVerificationEmail(body.email, code, body.nombre);
@@ -59,10 +62,11 @@ export async function GET() {
     return NextResponse.json(clientes);
   } catch (err) {
     if (isMissingTelefonoColumn(err)) {
+      await ensureTelefonoColumn();
       const clientes = await prisma.cliente.findMany({
-        select: { id: true, nombre: true, email: true, ventas: true },
+        select: { id: true, nombre: true, email: true, telefono: true, ventas: true },
       });
-      return NextResponse.json(clientes.map((cliente) => ({ ...cliente, telefono: "" })));
+      return NextResponse.json(clientes);
     }
 
     console.error(err);
@@ -98,9 +102,8 @@ export async function PUT(req) {
       cliente = await prisma.cliente.update({ where: { id }, data: updateData });
     } catch (err) {
       if (!isMissingTelefonoColumn(err)) throw err;
-      const updateDataSinTelefono = { ...updateData };
-      delete updateDataSinTelefono.telefono;
-      cliente = await prisma.cliente.update({ where: { id }, data: updateDataSinTelefono });
+      await ensureTelefonoColumn();
+      cliente = await prisma.cliente.update({ where: { id }, data: updateData });
     }
 
     return NextResponse.json(cliente);
