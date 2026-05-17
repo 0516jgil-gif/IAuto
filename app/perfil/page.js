@@ -85,7 +85,7 @@ export default function Perfil() {
         padding: "1rem 3rem", backgroundColor: "#0d0d0d", borderBottom: "1px solid #1a1a1a",
         position: "sticky", top: 0, zIndex: 100
       }}>
-        <span onClick={() => window.location.href = "/"} style={{ fontSize: "1.4rem", fontWeight: "800", color: "#3b82f6", cursor: "pointer", letterSpacing: "2px" }}>IAUTO</span>
+        <span className="iauto-logo" onClick={() => window.location.href = "/"} style={{ fontSize: "1.4rem", fontWeight: "800", color: "#3b82f6", cursor: "pointer", letterSpacing: "2px" }}>IAUTO</span>
         <div style={{ display: "flex", gap: "1rem" }}>
           <button onClick={() => window.location.href = "/Vehiculos"} style={{ background: "none", border: "1px solid #222", color: "#aaa", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", fontSize: "0.85rem" }}>
             Ver Vehiculos

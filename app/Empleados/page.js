@@ -525,7 +525,7 @@ export default function PanelAdmin() {
         zIndex: 100,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ fontSize: "1.4rem", fontWeight: "800", color: "#3b82f6", letterSpacing: "1px" }}>IAUTO</span>
+          <span className="iauto-logo" style={{ fontSize: "1.4rem", fontWeight: "800", color: "#3b82f6", letterSpacing: "1px" }}>IAUTO</span>
           <span style={{ color: "#333" }}>|</span>
           <span style={{ color: "#7c3aed", fontWeight: "600", fontSize: "0.9rem" }}>
             🔒 {isSuperAdmin ? "Panel Administrador" : "Panel Trabajador"}

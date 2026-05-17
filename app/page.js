@@ -87,6 +87,7 @@ export default function InicioIAuto() {
         }}
       >
         <div
+          className="iauto-logo"
           style={{
             fontSize: "1.5rem",
             fontWeight: "800",
@@ -199,8 +200,7 @@ export default function InicioIAuto() {
             marginBottom: "2rem",
           }}
         >
-          La plataforma inteligente para gestionar tu próximo
-          vehículo con la tecnología de IAuto.
+          Más fácil, más rápido, más tuyo.
         </p>
 
         <div

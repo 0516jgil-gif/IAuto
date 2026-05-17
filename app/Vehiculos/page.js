@@ -129,7 +129,7 @@ export default function ListaVehiculos() {
         position: "sticky", top: 0, backgroundColor: "rgba(0,0,0,0.95)",
         backdropFilter: "blur(12px)", zIndex: 100
       }}>
-        <h1 onClick={() => router.push("/")} style={{ cursor: "pointer", color: "#3b82f6", margin: 0, fontWeight: "800", letterSpacing: "2px" }}>
+        <h1 className="iauto-logo" onClick={() => router.push("/")} style={{ cursor: "pointer", color: "#3b82f6", margin: 0, fontWeight: "800", letterSpacing: "2px" }}>
           IAUTO
         </h1>
         <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>

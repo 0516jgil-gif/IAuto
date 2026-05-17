@@ -44,6 +44,41 @@ img {
   min-width: max-content;
 }
 
+.iauto-logo {
+  color: #3b82f6 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.iauto-logo::after {
+  content: "";
+  display: inline-block;
+  width: 54px;
+  height: 18px;
+  background-image: url("/iauto-car-mark.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .iauto-logo {
+    font-size: 1.5rem !important;
+  }
+
+  .iauto-logo::after {
+    width: 46px;
+    height: 16px;
+  }
+}
+
 @media (max-width: 1024px) {
   header {
     padding-left: 1.5rem !important;

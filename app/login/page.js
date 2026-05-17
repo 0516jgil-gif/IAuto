@@ -184,7 +184,7 @@ export default function AuthPage() {
         boxShadow: "0 25px 50px rgba(0,0,0,0.6)"
       }}>
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <span onClick={() => router.push("/")} style={{ fontSize: "1.8rem", fontWeight: "800", color: "#3b82f6", letterSpacing: "2px", cursor: "pointer" }}>
+          <span className="iauto-logo" onClick={() => router.push("/")} style={{ fontSize: "1.8rem", fontWeight: "800", color: "#3b82f6", letterSpacing: "2px", cursor: "pointer" }}>
             IAUTO
           </span>
         </div>
