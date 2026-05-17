@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { showError, showSuccess, showWarning } from "@/lib/alerts";
 
 export default function ListaVehiculos() {
   const [vehiculos, setVehiculos] = useState([]);
@@ -50,7 +51,7 @@ export default function ListaVehiculos() {
 
   const validarCliente = (accion) => {
     if (!isLogged || ["admin", "trabajador", "administrador"].includes(localStorage.getItem("userRol"))) {
-      alert(`Para ${accion} debes iniciar sesión como cliente.`);
+      showWarning(`Para ${accion} debes iniciar sesión como cliente.`);
       router.push("/login");
       return null;
     }
@@ -77,7 +78,7 @@ export default function ListaVehiculos() {
     setComprando(false);
 
     if (!res.ok) {
-      alert(data.error || "No se pudo registrar la compra.");
+      showError(data.error || "No se pudo registrar la compra.");
       return;
     }
 
@@ -85,7 +86,7 @@ export default function ListaVehiculos() {
       actuales.map((v) => v.id === compraPendiente.id ? { ...v, stock: Math.max(v.stock - 1, 0) } : v)
     );
     setCompraPendiente(null);
-    alert("Compra registrada correctamente. Ya aparece en tu perfil.");
+    showSuccess("Compra registrada correctamente. Ya aparece en tu perfil.");
   };
 
   const handleFavorito = async (vehiculoId) => {
@@ -100,11 +101,11 @@ export default function ListaVehiculos() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error || "No se pudo guardar el favorito.");
+      showError(data.error || "No se pudo guardar el favorito.");
       return;
     }
 
-    alert("Vehículo guardado en favoritos. Ya aparece en tu perfil.");
+    showSuccess("Vehículo guardado en favoritos. Ya aparece en tu perfil.");
   };
 
   const filtrados = vehiculos.filter(v =>

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { showError } from "@/lib/alerts";
 
 export default function Perfil() {
   const [cliente, setCliente] = useState(null);
@@ -40,7 +41,7 @@ export default function Perfil() {
 
     if (!res.ok) {
       const data = await res.json();
-      alert(data.error || "No se pudo eliminar el favorito.");
+      showError(data.error || "No se pudo eliminar el favorito.");
       return;
     }
 

@@ -1,5 +1,6 @@
 ﻿"use client";
 import { useEffect, useState } from "react";
+import { confirmAction, showError, showSuccess, showWarning } from "@/lib/alerts";
 
 export default function PanelAdmin() {
   const [data, setData] = useState({ clientes: [], vehiculos: [], ventas: [], empleados: [] });
@@ -214,17 +215,17 @@ export default function PanelAdmin() {
         };
 
     if (isCliente && (!payload.nombre || !payload.email || !payload.telefono)) {
-      alert("Completa nombre, email y teléfono.");
+      showWarning("Completa nombre, email y teléfono.");
       return;
     }
 
     if ((isEmpleado || isNewEmpleado) && (!payload.nombre || !payload.email || (isNewEmpleado && !payload.password))) {
-      alert(isNewEmpleado ? "Completa nombre, email y contraseña." : "Completa nombre y email.");
+      showWarning(isNewEmpleado ? "Completa nombre, email y contraseña." : "Completa nombre y email.");
       return;
     }
 
     if (!isCliente && !isEmpleado && !isNewEmpleado && (!payload.marca || !payload.modelo || Number.isNaN(payload.precio) || Number.isNaN(payload.stock))) {
-      alert("Completa marca, modelo, precio y stock con datos válidos.");
+      showWarning("Completa marca, modelo, precio y stock con datos válidos.");
       return;
     }
 
@@ -239,7 +240,7 @@ export default function PanelAdmin() {
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.error || "No se pudo guardar la edición.");
+        showError(result.error || "No se pudo guardar la edición.");
         setEditSaving(false);
         return;
       }
@@ -261,7 +262,7 @@ export default function PanelAdmin() {
             : prev.vehiculos.map(v => v.id === editingItem.id ? result : v),
       }));
       handleCancelarEdicion();
-      alert(
+      showSuccess(
         isCliente
           ? "El cliente se ha editado correctamente."
           : isNewEmpleado
@@ -273,7 +274,7 @@ export default function PanelAdmin() {
                 : "El vehículo se ha editado correctamente."
       );
     } catch (error) {
-      alert(isCliente ? "Error al editar el cliente." : isEmpleado || isNewEmpleado ? "Error al guardar el trabajador." : isNewVehiculo ? "Error al añadir el vehículo." : "Error al editar el vehículo.");
+      showError(isCliente ? "Error al editar el cliente." : isEmpleado || isNewEmpleado ? "Error al guardar el trabajador." : isNewVehiculo ? "Error al añadir el vehículo." : "Error al editar el vehículo.");
       setEditSaving(false);
     }
   };
@@ -337,7 +338,7 @@ export default function PanelAdmin() {
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.error || "No se pudo eliminar.");
+        showError(result.error || "No se pudo eliminar.");
         setDeleteSaving(false);
         return;
       }
@@ -364,15 +365,15 @@ export default function PanelAdmin() {
           : prev.ventas,
       }));
       handleCancelarBorrado();
-      alert("Se ha eliminado correctamente.");
+      showSuccess("Se ha eliminado correctamente.");
     } catch (error) {
-      alert("Error al eliminar.");
+      showError("Error al eliminar.");
       setDeleteSaving(false);
     }
   };
 
   const handleProcesarVenta = async (venta) => {
-    const confirmar = window.confirm(`¿Quieres procesar la venta #${venta.id}?`);
+    const confirmar = await confirmAction(`¿Quieres procesar la venta #${venta.id}?`);
     if (!confirmar) return;
 
     try {
@@ -384,7 +385,7 @@ export default function PanelAdmin() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "No se pudo procesar la venta.");
+        showError(data.error || "No se pudo procesar la venta.");
         return;
       }
 
@@ -392,9 +393,9 @@ export default function PanelAdmin() {
         ...prev,
         ventas: prev.ventas.map(v => v.id === venta.id ? data.venta : v),
       }));
-      alert("La venta se ha procesado correctamente y se ha enviado el email al cliente.");
+      showSuccess("La venta se ha procesado correctamente y se ha enviado el email al cliente.");
     } catch (error) {
-      alert("Error al procesar la venta.");
+      showError("Error al procesar la venta.");
     }
   };
 
@@ -986,10 +987,10 @@ export default function PanelAdmin() {
                               fd.append("file", file);
                               const res = await fetch("/api/upload", { method: "POST", body: fd });
                               const data = await res.json();
-                              if (!res.ok) { alert(data.error || "Error al subir imagen"); return; }
+                              if (!res.ok) { showError(data.error || "Error al subir imagen"); return; }
                               setEditForm(prev => ({ ...prev, imagenes: [...(prev.imagenes || []), data.url] }));
                             } catch {
-                              alert("Error al subir imagen");
+                              showError("Error al subir imagen");
                             } finally {
                               setUploadingImg(false);
                               e.target.value = "";

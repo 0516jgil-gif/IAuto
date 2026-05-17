@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { showError, showSuccess, showWarning } from "@/lib/alerts";
 
 export default function VehiculoDetalle() {
   const { id } = useParams();
@@ -62,7 +63,7 @@ export default function VehiculoDetalle() {
 
   const validarCliente = (accion) => {
     if (!isLogged || ["admin", "trabajador", "administrador"].includes(localStorage.getItem("userRol"))) {
-      alert(`Para ${accion} debes iniciar sesión como cliente.`);
+      showWarning(`Para ${accion} debes iniciar sesión como cliente.`);
       router.push("/login");
       return null;
     }
@@ -89,13 +90,13 @@ export default function VehiculoDetalle() {
     setComprando(false);
 
     if (!res.ok) {
-      alert(data.error || "No se pudo registrar la compra.");
+      showError(data.error || "No se pudo registrar la compra.");
       return;
     }
 
     setVehiculo((actual) => actual ? { ...actual, stock: Math.max(actual.stock - 1, 0) } : actual);
     setMostrarCompra(false);
-    alert("Compra registrada correctamente. Ya aparece en tu perfil.");
+    showSuccess("Compra registrada correctamente. Ya aparece en tu perfil.");
   };
 
   const handleFavorito = async () => {
@@ -110,11 +111,11 @@ export default function VehiculoDetalle() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error || "No se pudo guardar el favorito.");
+      showError(data.error || "No se pudo guardar el favorito.");
       return;
     }
 
-    alert("Vehículo guardado en favoritos. Ya aparece en tu perfil.");
+    showSuccess("Vehículo guardado en favoritos. Ya aparece en tu perfil.");
   };
 
   const card = {

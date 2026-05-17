@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { showError, showSuccess, showWarning } from "@/lib/alerts";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -59,7 +60,7 @@ export default function AuthPage() {
       }
     } else {
       const err = await res.json();
-      alert(err.error || "Error al procesar la solicitud");
+      showError(err.error || "Error al procesar la solicitud");
     }
     setLoading(false);
   };
@@ -87,7 +88,7 @@ export default function AuthPage() {
       }
     } else {
       const err = await res.json();
-      alert(err.error || "Código incorrecto");
+      showError(err.error || "Código incorrecto");
     }
     setLoading(false);
   };
@@ -105,7 +106,7 @@ export default function AuthPage() {
       setResetStep(2);
     } else {
       const err = await res.json();
-      alert(err.error || "Error al enviar el código");
+      showError(err.error || "Error al enviar el código");
     }
     setLoading(false);
   };
@@ -118,7 +119,7 @@ export default function AuthPage() {
   const handleResetConfirm = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      showWarning("Las contraseñas no coinciden");
       return;
     }
     setLoading(true);
@@ -129,7 +130,7 @@ export default function AuthPage() {
       body: JSON.stringify({ email: resetEmail, code: resetCode, newPassword, tipo }),
     });
     if (res.ok) {
-      alert("¡Contraseña cambiada con éxito! Ya puedes iniciar sesión.");
+      showSuccess("¡Contraseña cambiada con éxito! Ya puedes iniciar sesión.");
       setMode("auth");
       setResetStep(1);
       setResetEmail("");
@@ -138,7 +139,7 @@ export default function AuthPage() {
       setConfirmPassword("");
     } else {
       const err = await res.json();
-      alert(err.error || "Error al cambiar la contraseña");
+      showError(err.error || "Error al cambiar la contraseña");
     }
     setLoading(false);
   };
