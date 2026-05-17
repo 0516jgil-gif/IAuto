@@ -59,9 +59,9 @@ img {
 .iauto-logo::after {
   content: "";
   display: inline-block;
-  width: 54px;
-  height: 18px;
-  background-image: url("/iauto-car-mark.svg");
+  width: 68px;
+  height: 22px;
+  background-image: url("/iauto-car-mark.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -74,8 +74,8 @@ img {
   }
 
   .iauto-logo::after {
-    width: 46px;
-    height: 16px;
+    width: 58px;
+    height: 19px;
   }
 }
 
