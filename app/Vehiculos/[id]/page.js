@@ -34,9 +34,9 @@ export default function VehiculoDetalle() {
       localStorage.setItem("lastActivity", ahora.toString());
       Promise.resolve().then(() => {
         setIsLogged(true);
-        if (rol === "admin") {
+        if (["admin", "trabajador", "administrador"].includes(rol)) {
           setIsAdmin(true);
-          setUserName(adminName || "Admin");
+          setUserName(adminName || "Trabajador");
         } else {
           fetch("/api/Clientes")
             .then((r) => r.json())
@@ -61,7 +61,7 @@ export default function VehiculoDetalle() {
   }, [id]);
 
   const validarCliente = (accion) => {
-    if (!isLogged || localStorage.getItem("userRol") === "admin") {
+    if (!isLogged || ["admin", "trabajador", "administrador"].includes(localStorage.getItem("userRol"))) {
       alert(`Para ${accion} debes iniciar sesión como cliente.`);
       router.push("/login");
       return null;
@@ -200,7 +200,7 @@ export default function VehiculoDetalle() {
         <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
           {isAdmin && (
             <a href="/Empleados" style={{ color: "#a78bfa", fontSize: "0.85rem", textDecoration: "none", fontWeight: "600" }}>
-              🔒 Admin
+              🔒 Panel
             </a>
           )}
           {isLogged ? (

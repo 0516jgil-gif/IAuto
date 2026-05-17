@@ -4,6 +4,12 @@ import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/lib/email";
 import { isTrustedVerification } from "@/lib/trustedVerification";
 
+function normalizarRol(rol) {
+  if (rol === "administrador") return "administrador";
+  if (rol === "admin") return "administrador";
+  return "trabajador";
+}
+
 export async function POST(req) {
   try {
     const { email, password } = await req.json();
@@ -14,8 +20,10 @@ export async function POST(req) {
       return NextResponse.json({ error: "Empleado no encontrado" }, { status: 404 });
     }
 
-    if (empleado.rol !== "admin") {
-      return NextResponse.json({ error: "No tienes permisos de administrador" }, { status: 403 });
+    const rol = normalizarRol(empleado.rol);
+
+    if (!["trabajador", "administrador"].includes(rol)) {
+      return NextResponse.json({ error: "No tienes permisos de trabajador" }, { status: 403 });
     }
 
     // Si tiene contraseña hasheada, compara con bcrypt
@@ -42,14 +50,14 @@ export async function POST(req) {
     }
 
     if (isTrustedVerification(req, empleado.email, "admin")) {
-      return NextResponse.json({ id: empleado.id, nombre: empleado.nombre, rol: empleado.rol });
+      return NextResponse.json({ id: empleado.id, nombre: empleado.nombre, rol });
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     await prisma.empleado.update({ where: { email }, data: { verificationCode: code } });
     await sendVerificationEmail(email, code, empleado.nombre);
 
-    return NextResponse.json({ email: empleado.email, nombre: empleado.nombre, rol: empleado.rol, pendingVerification: true });
+    return NextResponse.json({ email: empleado.email, nombre: empleado.nombre, rol, pendingVerification: true });
   } catch (err) {
     console.error("Error admin-login:", err);
     return NextResponse.json({ error: "Error en el servidor: " + err.message }, { status: 500 });

@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 
 export default function PanelAdmin() {
-  const [data, setData] = useState({ clientes: [], vehiculos: [], ventas: [] });
+  const [data, setData] = useState({ clientes: [], vehiculos: [], ventas: [], empleados: [] });
   const [loading, setLoading] = useState(true);
   const [adminName, setAdminName] = useState("");
+  const [adminRol, setAdminRol] = useState("trabajador");
   const [tab, setTab] = useState("clientes");
   const [editingItem, setEditingItem] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -20,13 +21,15 @@ export default function PanelAdmin() {
   useEffect(() => {
     const rol = localStorage.getItem("userRol");
     const nombre = localStorage.getItem("userName");
+    const esTrabajador = ["admin", "trabajador", "administrador"].includes(rol);
 
-    if (rol !== "admin") {
+    if (!esTrabajador) {
       window.location.href = "/login";
       return;
     }
 
-    setAdminName(nombre || "Admin");
+    setAdminName(nombre || "Trabajador");
+    setAdminRol(rol === "admin" ? "administrador" : rol || "trabajador");
 
     const cargarLista = async (url) => {
       const res = await fetch(url);
@@ -43,8 +46,9 @@ export default function PanelAdmin() {
       cargarLista("/api/Clientes"),
       cargarLista("/api/Vehiculos"),
       cargarLista("/api/ventas"),
-    ]).then(([clientes, vehiculos, ventas]) => {
-      const errores = [clientes, vehiculos, ventas]
+      cargarLista("/api/Empleados"),
+    ]).then(([clientes, vehiculos, ventas, empleados]) => {
+      const errores = [clientes, vehiculos, ventas, empleados]
         .filter((resultado) => resultado.status === "rejected")
         .map((resultado) => resultado.reason?.message || "Error de carga");
 
@@ -52,6 +56,7 @@ export default function PanelAdmin() {
         clientes: clientes.status === "fulfilled" ? clientes.value : [],
         vehiculos: vehiculos.status === "fulfilled" ? vehiculos.value : [],
         ventas: ventas.status === "fulfilled" ? ventas.value : [],
+        empleados: empleados.status === "fulfilled" ? empleados.value : [],
       });
       setLoadError(errores.join(" | "));
       setLoading(false);
@@ -131,6 +136,26 @@ export default function PanelAdmin() {
     });
   };
 
+  const handleEditarEmpleado = (empleado) => {
+    setEditingItem({ type: "empleado", id: empleado.id });
+    setEditForm({
+      nombre: empleado.nombre || "",
+      email: empleado.email || "",
+      rol: empleado.rol === "administrador" ? "administrador" : "trabajador",
+      password: "",
+    });
+  };
+
+  const handleCrearEmpleado = () => {
+    setEditingItem({ type: "empleadoNuevo" });
+    setEditForm({
+      nombre: "",
+      email: "",
+      rol: "trabajador",
+      password: "",
+    });
+  };
+
   const handleCancelarEdicion = () => {
     setEditingItem(null);
     setEditForm({});
@@ -144,9 +169,15 @@ export default function PanelAdmin() {
     if (!editingItem) return;
 
     const isCliente = editingItem.type === "cliente";
+    const isEmpleado = editingItem.type === "empleado";
+    const isNewEmpleado = editingItem.type === "empleadoNuevo";
     const isNewVehiculo = editingItem.type === "vehiculoNuevo";
     const url = isCliente
       ? `/api/Clientes?id=${editingItem.id}`
+      : isEmpleado
+        ? `/api/Empleados?id=${editingItem.id}`
+        : isNewEmpleado
+          ? "/api/Empleados"
       : isNewVehiculo
         ? "/api/Vehiculos"
         : `/api/Vehiculos?id=${editingItem.id}`;
@@ -157,6 +188,13 @@ export default function PanelAdmin() {
           email:    editForm.email.trim(),
           telefono: editForm.telefono.trim(),
         }
+      : (isEmpleado || isNewEmpleado)
+        ? {
+            nombre: editForm.nombre.trim(),
+            email: editForm.email.trim(),
+            rol: editForm.rol === "administrador" ? "administrador" : "trabajador",
+            password: editForm.password,
+          }
       : {
           marca:       editForm.marca.trim(),
           modelo:      editForm.modelo.trim(),
@@ -180,7 +218,12 @@ export default function PanelAdmin() {
       return;
     }
 
-    if (!isCliente && (!payload.marca || !payload.modelo || Number.isNaN(payload.precio) || Number.isNaN(payload.stock))) {
+    if ((isEmpleado || isNewEmpleado) && (!payload.nombre || !payload.email || (isNewEmpleado && !payload.password))) {
+      alert(isNewEmpleado ? "Completa nombre, email y contraseña." : "Completa nombre y email.");
+      return;
+    }
+
+    if (!isCliente && !isEmpleado && !isNewEmpleado && (!payload.marca || !payload.modelo || Number.isNaN(payload.precio) || Number.isNaN(payload.stock))) {
       alert("Completa marca, modelo, precio y stock con datos válidos.");
       return;
     }
@@ -189,7 +232,7 @@ export default function PanelAdmin() {
 
     try {
       const res = await fetch(url, {
-        method: isNewVehiculo ? "POST" : "PUT",
+        method: isNewVehiculo || isNewEmpleado ? "POST" : "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -206,16 +249,31 @@ export default function PanelAdmin() {
         clientes: isCliente
           ? prev.clientes.map(c => c.id === editingItem.id ? result : c)
           : prev.clientes,
-        vehiculos: isCliente
+        empleados: isEmpleado
+          ? prev.empleados.map(e => e.id === editingItem.id ? result : e)
+          : isNewEmpleado
+            ? [...prev.empleados, result]
+            : prev.empleados,
+        vehiculos: isCliente || isEmpleado || isNewEmpleado
           ? prev.vehiculos
           : isNewVehiculo
             ? [...prev.vehiculos, result]
             : prev.vehiculos.map(v => v.id === editingItem.id ? result : v),
       }));
       handleCancelarEdicion();
-      alert(isCliente ? "El cliente se ha editado correctamente." : isNewVehiculo ? "El vehículo se ha añadido correctamente." : "El vehículo se ha editado correctamente.");
+      alert(
+        isCliente
+          ? "El cliente se ha editado correctamente."
+          : isNewEmpleado
+            ? "El trabajador se ha añadido correctamente."
+            : isEmpleado
+              ? "El trabajador se ha editado correctamente."
+              : isNewVehiculo
+                ? "El vehículo se ha añadido correctamente."
+                : "El vehículo se ha editado correctamente."
+      );
     } catch (error) {
-      alert(isCliente ? "Error al editar el cliente." : isNewVehiculo ? "Error al añadir el vehículo." : "Error al editar el vehículo.");
+      alert(isCliente ? "Error al editar el cliente." : isEmpleado || isNewEmpleado ? "Error al guardar el trabajador." : isNewVehiculo ? "Error al añadir el vehículo." : "Error al editar el vehículo.");
       setEditSaving(false);
     }
   };
@@ -233,6 +291,14 @@ export default function PanelAdmin() {
       type: "vehiculo",
       id: vehiculo.id,
       name: `${vehiculo.marca || ""} ${vehiculo.modelo || ""}`.trim() || `Vehículo #${vehiculo.id}`,
+    });
+  };
+
+  const handleDenegarEmpleado = (empleado) => {
+    setDeleteItem({
+      type: "empleado",
+      id: empleado.id,
+      name: empleado.nombre || `Trabajador #${empleado.id}`,
     });
   };
 
@@ -255,11 +321,14 @@ export default function PanelAdmin() {
 
     const isCliente = deleteItem.type === "cliente";
     const isVehiculo = deleteItem.type === "vehiculo";
+    const isEmpleado = deleteItem.type === "empleado";
     const url = isCliente
       ? `/api/Clientes?id=${deleteItem.id}`
       : isVehiculo
         ? `/api/Vehiculos?id=${deleteItem.id}`
-        : `/api/ventas?id=${deleteItem.id}`;
+        : isEmpleado
+          ? `/api/Empleados?id=${deleteItem.id}`
+          : `/api/ventas?id=${deleteItem.id}`;
 
     setDeleteSaving(true);
 
@@ -278,6 +347,9 @@ export default function PanelAdmin() {
         clientes: isCliente
           ? prev.clientes.filter(c => c.id !== deleteItem.id)
           : prev.clientes,
+        empleados: isEmpleado
+          ? prev.empleados.filter(e => e.id !== deleteItem.id)
+          : prev.empleados,
         vehiculos: isVehiculo
           ? prev.vehiculos.filter(v => v.id !== deleteItem.id)
           : deleteItem.type === "venta" && deleteItem.venta?.estado === "pendiente"
@@ -408,6 +480,7 @@ export default function PanelAdmin() {
 
   const clienteSearchText = clienteSearch.trim().toLowerCase();
   const vehiculoSearchText = vehiculoSearch.trim().toLowerCase();
+  const isSuperAdmin = adminRol === "administrador";
 
   const filteredClientes = data.clientes.filter(cliente =>
     [cliente.id, cliente.nombre, cliente.email, cliente.telefono]
@@ -422,10 +495,12 @@ export default function PanelAdmin() {
   const ventasPendientes = data.ventas.filter(venta => (venta.estado || "pendiente") === "pendiente");
   const ventasRealizadas = data.ventas.filter(venta => venta.estado === "realizada");
   const ventasCanceladas = data.ventas.filter(venta => venta.estado === "cancelada");
+  const empleadosTrabajadores = data.empleados.filter(empleado => empleado.rol !== "administrador");
 
   const statCards = [
     { label: "Clientes",   value: data.clientes.length,     icon: "👥", color: "#3b82f6" },
     { label: "Vehículos",  value: data.vehiculos.length,    icon: "🚗", color: "#10b981" },
+    { label: "Trabajadores", value: empleadosTrabajadores.length, icon: "ID", color: "#a78bfa" },
     { label: "Canceladas", value: ventasCanceladas.length,  icon: "!",  color: "#ef4444" },
     { label: "Ventas",     value: ventasRealizadas.length,  icon: "💰", color: "#f59e0b" },
     {
@@ -452,7 +527,9 @@ export default function PanelAdmin() {
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <span style={{ fontSize: "1.4rem", fontWeight: "800", color: "#3b82f6", letterSpacing: "1px" }}>IAUTO</span>
           <span style={{ color: "#333" }}>|</span>
-          <span style={{ color: "#7c3aed", fontWeight: "600", fontSize: "0.9rem" }}>🔒 Panel Admin</span>
+          <span style={{ color: "#7c3aed", fontWeight: "600", fontSize: "0.9rem" }}>
+            🔒 {isSuperAdmin ? "Panel Administrador" : "Panel Trabajador"}
+          </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
@@ -469,7 +546,7 @@ export default function PanelAdmin() {
       </header>
 
       <main style={{ padding: "2.5rem 3rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1 style={{ fontSize: "1.8rem", fontWeight: "700", marginBottom: "0.3rem" }}>Panel de Administración</h1>
+        <h1 style={{ fontSize: "1.8rem", fontWeight: "700", marginBottom: "0.3rem" }}>{isSuperAdmin ? "Panel de Administración" : "Panel de Trabajo"}</h1>
         <p style={{ color: "#555", marginBottom: "2.5rem", fontSize: "0.9rem" }}>Gestión completa de la plataforma IAuto</p>
 
         {loadError && (
@@ -478,7 +555,7 @@ export default function PanelAdmin() {
           </div>
         )}
 
-        <div className="iauto-admin-stats" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
+        <div className="iauto-admin-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1.2rem", marginBottom: "3rem" }}>
           {statCards.map(({ label, value, icon, color }) => (
             <div key={label} style={{ backgroundColor: "#111", borderRadius: "16px", padding: "1.35rem", border: "1px solid #1f1f1f", position: "relative", overflow: "hidden", minHeight: "142px" }}>
               <div style={{ position: "absolute", top: "-12px", right: "-8px", fontSize: "4.6rem", opacity: 0.14, color, fontWeight: "900", lineHeight: 1 }}>{icon}</div>
@@ -490,9 +567,9 @@ export default function PanelAdmin() {
         </div>
 
         <div className="iauto-admin-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          {["clientes", "vehiculos", "ventas"].map(t => (
+          {["clientes", "vehiculos", "ventas", ...(isSuperAdmin ? ["trabajadores"] : [])].map(t => (
             <button key={t} onClick={() => setTab(t)} style={tabStyle(tab === t)}>
-              {t === "clientes" ? "👥 Clientes" : t === "vehiculos" ? "🚗 Vehículos" : "💰 Ventas"}
+              {t === "clientes" ? "👥 Clientes" : t === "vehiculos" ? "🚗 Vehículos" : t === "trabajadores" ? "🔐 Trabajadores" : "💰 Ventas"}
             </button>
           ))}
         </div>
@@ -569,6 +646,46 @@ export default function PanelAdmin() {
                         <div style={actionButtonsStyle}>
                           <button onClick={() => handleEditarVehiculo(v)} title="Editar vehículo" style={buttonActionStyle("edit")}>✎</button>
                           <button onClick={() => handleDenegarVehiculo(v)} title="Borrar vehículo" style={buttonActionStyle("no")}>X</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {tab === "trabajadores" && isSuperAdmin && (
+          <div style={{ backgroundColor: "#0d0d0d", borderRadius: "16px", border: "1px solid #1a1a1a", overflow: "hidden" }}>
+            <div style={{ padding: "1.2rem 1.5rem", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem" }}>Gestión de Trabajadores ({data.empleados.length})</h3>
+              <button onClick={handleCrearEmpleado} style={{ backgroundColor: "#064e3b", border: "1px solid #34d399", color: "#34d399", padding: "0.65rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "700", whiteSpace: "nowrap" }}>
+                + Añadir trabajador
+              </button>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#111" }}>
+                    {["ID", "Nombre", "Email", "Rol", "Acción"].map(h => (
+                      <th key={h} style={tableHeaderStyle(h === "Acción")}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.empleados.map((empleado, i) => (
+                    <tr key={empleado.id} style={{ borderTop: "1px solid #151515", backgroundColor: i % 2 === 0 ? "transparent" : "#0a0a0a" }}>
+                      <td style={{ padding: "1rem 1.5rem", color: "#555", fontSize: "0.85rem" }}>#{empleado.id}</td>
+                      <td style={{ padding: "1rem 1.5rem", fontWeight: "600" }}>{empleado.nombre}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: "#3b82f6" }}>{empleado.email}</td>
+                      <td style={{ padding: "1rem 1.5rem", color: empleado.rol === "administrador" ? "#a78bfa" : "#10b981", fontWeight: "800" }}>
+                        {empleado.rol === "administrador" ? "Administrador" : "Trabajador"}
+                      </td>
+                      <td style={actionCellStyle}>
+                        <div style={actionButtonsStyle}>
+                          <button onClick={() => handleEditarEmpleado(empleado)} title="Editar trabajador" style={buttonActionStyle("edit")}>✎</button>
+                          <button onClick={() => handleDenegarEmpleado(empleado)} title="Borrar trabajador" style={buttonActionStyle("no")}>X</button>
                         </div>
                       </td>
                     </tr>
@@ -710,7 +827,7 @@ export default function PanelAdmin() {
             style={{ width: "100%", maxWidth: "500px", backgroundColor: "#0d0d0d", border: "1px solid #262626", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)", margin: "auto" }}
           >
             <h2 style={{ margin: "0 0 1rem", fontSize: "1.2rem" }}>
-              {editingItem.type === "cliente" ? "Editar cliente" : editingItem.type === "vehiculoNuevo" ? "Añadir vehículo" : "Editar vehículo"}
+              {editingItem.type === "cliente" ? "Editar cliente" : editingItem.type === "empleadoNuevo" ? "Añadir trabajador" : editingItem.type === "empleado" ? "Editar trabajador" : editingItem.type === "vehiculoNuevo" ? "Añadir vehículo" : "Editar vehículo"}
             </h2>
 
             <div style={{ display: "grid", gap: "0.9rem" }}>
@@ -727,6 +844,28 @@ export default function PanelAdmin() {
                   <label style={labelStyle}>
                     Teléfono
                     <input value={editForm.telefono || ""} onChange={(e) => setEditForm(prev => ({ ...prev, telefono: e.target.value }))} style={inputStyle} />
+                  </label>
+                </>
+              ) : editingItem.type === "empleado" || editingItem.type === "empleadoNuevo" ? (
+                <>
+                  <label style={labelStyle}>
+                    Nombre
+                    <input value={editForm.nombre || ""} onChange={(e) => setEditForm(prev => ({ ...prev, nombre: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Email
+                    <input type="email" value={editForm.email || ""} onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Rol
+                    <select value={editForm.rol || "trabajador"} onChange={(e) => setEditForm(prev => ({ ...prev, rol: e.target.value }))} style={inputStyle}>
+                      <option value="trabajador">Trabajador</option>
+                      <option value="administrador">Administrador</option>
+                    </select>
+                  </label>
+                  <label style={labelStyle}>
+                    {editingItem.type === "empleadoNuevo" ? "Contraseña" : "Nueva contraseña (opcional)"}
+                    <input type="password" value={editForm.password || ""} onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))} style={inputStyle} />
                   </label>
                 </>
               ) : (
@@ -883,7 +1022,7 @@ export default function PanelAdmin() {
           <div className="iauto-modal-panel" style={{ width: "100%", maxWidth: "430px", backgroundColor: "#0d0d0d", border: "1px solid #7f1d1d", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 24px 70px rgba(0,0,0,0.55)" }}>
             <h2 style={{ margin: "0 0 0.6rem", fontSize: "1.2rem" }}>Confirmar borrado</h2>
             <p style={{ color: "#aaa", lineHeight: 1.5, margin: "0 0 1rem" }}>
-              ¿Seguro que quieres {deleteItem.type === "venta" ? "cancelar" : "borrar"} {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : "la venta"}?
+              ¿Seguro que quieres {deleteItem.type === "venta" ? "cancelar" : "borrar"} {deleteItem.type === "vehiculo" ? "el vehículo" : deleteItem.type === "cliente" ? "el cliente" : deleteItem.type === "empleado" ? "el trabajador" : "la venta"}?
             </p>
             <div style={{ backgroundColor: "#050505", border: "1px solid #262626", borderRadius: "10px", padding: "0.9rem", color: "#fff", fontWeight: "800", marginBottom: "1.2rem", textAlign: "center" }}>
               {deleteItem.name}

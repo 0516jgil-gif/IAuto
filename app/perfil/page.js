@@ -12,7 +12,7 @@ export default function Perfil() {
     const userId = localStorage.getItem("userId");
     const rol = localStorage.getItem("userRol");
     if (!userId) { window.location.href = "/login"; return; }
-    if (rol === "admin") { window.location.href = "/Empleados"; return; }
+    if (["admin", "trabajador", "administrador"].includes(rol)) { window.location.href = "/Empleados"; return; }
 
     const clienteId = Number(userId);
 

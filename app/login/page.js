@@ -49,7 +49,7 @@ export default function AuthPage() {
         localStorage.setItem("userId", data.id);
         localStorage.setItem("lastActivity", new Date().getTime().toString());
         if (isAdmin) {
-          localStorage.setItem("userRol", "admin");
+          localStorage.setItem("userRol", data.rol || "trabajador");
           localStorage.setItem("userName", data.nombre);
           router.push("/Empleados");
         } else {
@@ -78,7 +78,7 @@ export default function AuthPage() {
       localStorage.setItem("userId", user.id);
       localStorage.setItem("lastActivity", new Date().getTime().toString());
       if (isAdmin) {
-        localStorage.setItem("userRol", "admin");
+        localStorage.setItem("userRol", user.rol || "trabajador");
         localStorage.setItem("userName", user.nombre);
         router.push("/Empleados");
       } else {
@@ -202,11 +202,11 @@ export default function AuthPage() {
                 flex: 1, padding: "10px", border: "none", cursor: "pointer",
                 backgroundColor: isAdmin ? "#7c3aed" : "#111",
                 color: isAdmin ? "#fff" : "#666", fontWeight: "600", transition: "0.2s"
-              }}>🔒 Admin</button>
+              }}>🔒 Trabajador</button>
             </div>
 
             <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: "1.5rem", fontSize: "1.1rem", color: "#aaa" }}>
-              {isAdmin ? "Acceso de Administrador" : (isLogin ? "Bienvenido de vuelta" : "Crear cuenta")}
+              {isAdmin ? "Acceso de trabajadores" : (isLogin ? "Bienvenido de vuelta" : "Crear cuenta")}
             </h2>
 
             <form onSubmit={handleSubmit}>
@@ -223,7 +223,7 @@ export default function AuthPage() {
               <input type="password" placeholder="Contraseña" required style={inputStyle}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
               <button type="submit" disabled={loading} style={{ ...btnStyle, opacity: loading ? 0.7 : 1 }}>
-                {loading ? "Cargando..." : (isAdmin ? "Acceder como Admin" : (isLogin ? "Entrar" : "Crear Cuenta"))}
+                {loading ? "Cargando..." : (isAdmin ? "Acceder como trabajador" : (isLogin ? "Entrar" : "Crear Cuenta"))}
               </button>
             </form>
 

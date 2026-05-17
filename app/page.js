@@ -20,12 +20,14 @@ export default function InicioIAuto() {
     const adminName = localStorage.getItem("userName");
     const ahora = new Date().getTime();
 
+    const esTrabajador = ["admin", "trabajador", "administrador"].includes((rol || "").toLowerCase());
+
     if (
       userId &&
       lastActivity &&
       ahora - parseInt(lastActivity) < 30 * 60 * 1000
     ) {
-      if (rol && rol.toLowerCase() === "admin" && adminName) {
+      if (esTrabajador && adminName) {
         Promise.resolve().then(() => {
           setUsuario({ nombre: adminName });
           setIsAdmin(true);
@@ -109,7 +111,7 @@ export default function InicioIAuto() {
             Vehículos
           </Link>
 
-          {/* SOLO ADMIN */}
+          {/* SOLO TRABAJADORES */}
           {isAdmin && (
             <Link
               href="/Empleados"
@@ -118,7 +120,7 @@ export default function InicioIAuto() {
                 color: "#a78bfa",
               }}
             >
-              🔒 Admin
+              🔒 Panel
             </Link>
           )}
 

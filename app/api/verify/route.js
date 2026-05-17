@@ -2,6 +2,12 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { setTrustedVerificationCookie } from "@/lib/trustedVerification";
 
+function normalizarRol(rol) {
+  if (rol === "administrador") return "administrador";
+  if (rol === "admin") return "administrador";
+  return "trabajador";
+}
+
 export async function POST(req) {
   try {
     const { email, code, tipo } = await req.json(); // tipo: "cliente" o "admin"
@@ -14,7 +20,7 @@ export async function POST(req) {
       }
 
       await prisma.empleado.update({ where: { email }, data: { verificationCode: null } });
-      const res = NextResponse.json({ id: empleado.id, nombre: empleado.nombre, rol: empleado.rol });
+      const res = NextResponse.json({ id: empleado.id, nombre: empleado.nombre, rol: normalizarRol(empleado.rol) });
       setTrustedVerificationCookie(res, empleado.email, "admin");
       return res;
     } else {

@@ -22,7 +22,7 @@ model Empleado {
   id               Int     @id @default(autoincrement())
   nombre           String
   email            String  @unique
-  rol              String  @default("empleado")
+  rol              String  @default("trabajador")
   password         String?
   verificationCode String?
   ventas           Venta[]

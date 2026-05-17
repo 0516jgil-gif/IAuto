@@ -5,7 +5,7 @@ import { sendSaleCancellationEmail, sendSaleConfirmationEmail } from "@/lib/emai
 
 const ventaInclude = {
   cliente: { select: { id: true, nombre: true, email: true } },
-  empleado: true,
+  empleado: { select: { id: true, nombre: true, email: true, rol: true } },
   vehiculo: true,
 };
 
