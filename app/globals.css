@@ -48,7 +48,7 @@ img {
   color: #009ee3 !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 0.7rem !important;
+  gap: 0.18rem !important;
   font-size: 1.5rem !important;
   font-weight: 800 !important;
   letter-spacing: 2px !important;
@@ -59,8 +59,8 @@ img {
 .iauto-logo::after {
   content: "";
   display: inline-block;
-  width: 104px;
-  height: 34px;
+  width: 128px;
+  height: 42px;
   background-image: url("/iauto-car-mark.png");
   background-repeat: no-repeat;
   background-position: center;
@@ -74,8 +74,8 @@ img {
   }
 
   .iauto-logo::after {
-    width: 82px;
-    height: 27px;
+    width: 104px;
+    height: 34px;
   }
 }
 
