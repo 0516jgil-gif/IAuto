@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { showError, showSuccess, showWarning } from "@/lib/alerts";
+import { imageSrc } from "@/lib/imageSrc";
 
 export default function VehiculoDetalle() {
   const { id } = useParams();
@@ -249,7 +250,7 @@ export default function VehiculoDetalle() {
             }}>
               {imagenes ? (
                 <img
-                  src={imagenes[imagenActiva]}
+                  src={imageSrc(imagenes[imagenActiva])}
                   alt={`${vehiculo.marca} ${vehiculo.modelo} - foto ${imagenActiva + 1}`}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -275,7 +276,7 @@ export default function VehiculoDetalle() {
                     }}
                   >
                     <img
-                      src={url}
+                      src={imageSrc(url)}
                       alt={`miniatura ${i + 1}`}
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />

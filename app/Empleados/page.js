@@ -1,6 +1,7 @@
 ﻿"use client";
 import { useEffect, useState } from "react";
 import { confirmAction, showError, showSuccess, showWarning } from "@/lib/alerts";
+import { imageSrc } from "@/lib/imageSrc";
 
 export default function PanelAdmin() {
   const [data, setData] = useState({ clientes: [], vehiculos: [], ventas: [], empleados: [] });
@@ -961,7 +962,7 @@ export default function PanelAdmin() {
                       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                         {(editForm.imagenes || []).map((url, i) => (
                           <div key={i} style={{ position: "relative", width: "64px", height: "48px" }}>
-                            <img src={url} alt={`img ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #333" }} />
+                            <img src={imageSrc(url)} alt={`img ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #333" }} />
                             <button
                               type="button"
                               onClick={() => setEditForm(prev => ({ ...prev, imagenes: prev.imagenes.filter((_, idx) => idx !== i) }))}

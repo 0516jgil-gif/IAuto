@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { showError, showSuccess, showWarning } from "@/lib/alerts";
+import { imageSrc } from "@/lib/imageSrc";
 
 export default function ListaVehiculos() {
   const [vehiculos, setVehiculos] = useState([]);
@@ -202,7 +203,7 @@ export default function ListaVehiculos() {
               }}>
                 {v.imagenes && v.imagenes.length > 0 ? (
                   <img
-                    src={v.imagenes[0]}
+                    src={imageSrc(v.imagenes[0])}
                     alt={`${v.marca} ${v.modelo}`}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
