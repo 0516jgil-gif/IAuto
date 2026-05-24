@@ -7,6 +7,10 @@ export default function InicioIAuto() {
   const [usuario, setUsuario] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Contacto
+  const [contactForm, setContactForm] = useState({ nombre: "", email: "", telefono: "", mensaje: "" });
+  const [contactStatus, setContactStatus] = useState(null); // null | "sending" | "ok" | "error"
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -46,6 +50,26 @@ export default function InicioIAuto() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleContactSubmit = async () => {
+    if (!contactForm.nombre || !contactForm.email || !contactForm.mensaje) return;
+    setContactStatus("sending");
+    try {
+      const res = await fetch("/api/contacto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      });
+      if (res.ok) {
+        setContactStatus("ok");
+        setContactForm({ nombre: "", email: "", telefono: "", mensaje: "" });
+      } else {
+        setContactStatus("error");
+      }
+    } catch {
+      setContactStatus("error");
+    }
+  };
 
   const navLink = {
     color: "#aaa",
@@ -111,6 +135,13 @@ export default function InicioIAuto() {
           <Link href="/Vehiculos" style={navLink}>
             Vehículos
           </Link>
+
+          <a
+            href="#contacto"
+            style={navLink}
+          >
+            Contacto
+          </a>
 
           {/* SOLO TRABAJADORES */}
           {isAdmin && (
@@ -375,6 +406,167 @@ export default function InicioIAuto() {
           completamente la experiencia de compra y gestión
           automotriz.
         </p>
+      </section>
+
+      {/* CONTACTO */}
+      <section
+        id="contacto"
+        style={{
+          padding: "7rem 4rem",
+          maxWidth: "700px",
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <h2 style={{ color: "#3b82f6", fontSize: "2.5rem", marginBottom: "1rem" }}>
+            Contáctanos
+          </h2>
+          <p style={{ color: "#555" }}>
+            ¿Tienes alguna pregunta? Escríbenos y te respondemos en breve.
+          </p>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: "#0d0d0d",
+            border: "1px solid #1a1a1a",
+            borderRadius: "20px",
+            padding: "2.5rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.2rem",
+          }}
+        >
+          {/* Nombre + Email */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div>
+              <label style={{ color: "#888", fontSize: "0.8rem", display: "block", marginBottom: "0.4rem" }}>
+                Nombre *
+              </label>
+              <input
+                type="text"
+                placeholder="Tu nombre"
+                value={contactForm.nombre}
+                onChange={(e) => setContactForm((f) => ({ ...f, nombre: e.target.value }))}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "10px",
+                  border: "1px solid #222",
+                  backgroundColor: "#050505",
+                  color: "#fff",
+                  fontSize: "0.9rem",
+                  outline: "none",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ color: "#888", fontSize: "0.8rem", display: "block", marginBottom: "0.4rem" }}>
+                Email *
+              </label>
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                value={contactForm.email}
+                onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "10px",
+                  border: "1px solid #222",
+                  backgroundColor: "#050505",
+                  color: "#fff",
+                  fontSize: "0.9rem",
+                  outline: "none",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Teléfono */}
+          <div>
+            <label style={{ color: "#888", fontSize: "0.8rem", display: "block", marginBottom: "0.4rem" }}>
+              Teléfono (opcional)
+            </label>
+            <input
+              type="tel"
+              placeholder="+34 600 000 000"
+              value={contactForm.telefono}
+              onChange={(e) => setContactForm((f) => ({ ...f, telefono: e.target.value }))}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "0.75rem 1rem",
+                borderRadius: "10px",
+                border: "1px solid #222",
+                backgroundColor: "#050505",
+                color: "#fff",
+                fontSize: "0.9rem",
+                outline: "none",
+              }}
+            />
+          </div>
+
+          {/* Mensaje */}
+          <div>
+            <label style={{ color: "#888", fontSize: "0.8rem", display: "block", marginBottom: "0.4rem" }}>
+              Mensaje *
+            </label>
+            <textarea
+              placeholder="¿En qué podemos ayudarte?"
+              rows={5}
+              value={contactForm.mensaje}
+              onChange={(e) => setContactForm((f) => ({ ...f, mensaje: e.target.value }))}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "0.75rem 1rem",
+                borderRadius: "10px",
+                border: "1px solid #222",
+                backgroundColor: "#050505",
+                color: "#fff",
+                fontSize: "0.9rem",
+                outline: "none",
+                resize: "vertical",
+                fontFamily: "sans-serif",
+              }}
+            />
+          </div>
+
+          {/* Feedback */}
+          {contactStatus === "ok" && (
+            <div style={{ backgroundColor: "#052e16", border: "1px solid #166534", borderRadius: "10px", padding: "0.9rem 1.2rem", color: "#4ade80", fontSize: "0.9rem" }}>
+              ✅ Mensaje enviado correctamente. Te responderemos pronto.
+            </div>
+          )}
+          {contactStatus === "error" && (
+            <div style={{ backgroundColor: "#1c0606", border: "1px solid #7f1d1d", borderRadius: "10px", padding: "0.9rem 1.2rem", color: "#f87171", fontSize: "0.9rem" }}>
+              ❌ Ha ocurrido un error. Inténtalo de nuevo o escríbenos directamente.
+            </div>
+          )}
+
+          {/* Botón */}
+          <button
+            onClick={handleContactSubmit}
+            disabled={contactStatus === "sending"}
+            style={{
+              padding: "0.9rem 2rem",
+              borderRadius: "30px",
+              border: "none",
+              backgroundColor: contactStatus === "sending" ? "#1e3a5f" : "#3b82f6",
+              color: "#fff",
+              fontWeight: "700",
+              fontSize: "0.95rem",
+              cursor: contactStatus === "sending" ? "not-allowed" : "pointer",
+              transition: "0.2s",
+              alignSelf: "flex-end",
+            }}
+          >
+            {contactStatus === "sending" ? "Enviando..." : "Enviar mensaje →"}
+          </button>
+        </div>
       </section>
 
       {/* FOOTER */}
